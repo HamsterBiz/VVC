@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{56AB41AA-4B24-42A0-8C15-6C00562F08B9}</ProjectGuid>
+    <ProjectGuid>{DBE34A0C-DD7D-42A2-A4B0-15876F334005}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>VVC</RootNamespace>
+    <RootNamespace>TestNaŁadowanieObrazu</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,13 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LoadFile.cpp" />
-    <ClCompile Include="PictureFile.cpp" />
-    <ClCompile Include="VVC.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="TestNaŁadowanieObrazu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LoadFile.h" />
-    <ClInclude Include="PictureFile.h" />
+    <ClInclude Include="Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
