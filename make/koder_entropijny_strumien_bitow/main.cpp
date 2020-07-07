@@ -4,7 +4,8 @@
 #include <inttypes.h>
 #include <iostream>
 using namespace std;
-
+#include <ctime>
+#include <vector>
 #include "TOutputBitstream.h"
 #include "TInputBitstream.h"
 
@@ -25,8 +26,35 @@ int main()
   //bit_stream->Write(4);
   //bit_stream->PutN(vector_test, 8);
   //bit_stream->Write(1);
+
   TInputBitstream* load_bit_stream = new TInputBitstream();
-  load_bit_stream->Read(1);
+
+  /* Implementacja testów */
+  srand(time(NULL));
+  int iAmountTest = 100;
+  vector<uint32_t> NumBit;
+  vector<uint32_t> ValBit;
+  
+  for (int i = 0; i < iAmountTest; i++)
+  {
+    NumBit.push_back((rand() % 32) + 0);
+    ValBit.push_back((std::rand() % 2147483647) + 0);
+  }
+  for (int i = 0; i < iAmountTest; i++)
+  {
+    bit_stream->PutN(ValBit[i], NumBit[i]);
+  }
+  bit_stream->Write();
+  load_bit_stream->Read();
+  int iTemp = int(bit_stream->GetSizeBuffor());
+  cerr << "testowanie" << endl;
+  int counter = 0;
+  for (int i = 0; i < iTemp; i++)
+  {
+    load_bit_stream->Test(bit_stream->GetValueFromVector(i), i);
+    counter++;
+  }
+  /* ------------------------------------------------------------- */
 }
 
 

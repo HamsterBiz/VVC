@@ -33,12 +33,22 @@ void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
 
 }
 
-void TOutputBitstream::Write(int n)
+unsigned TOutputBitstream::GetSizeBuffor()
+{
+  return m_fifo.size();
+}
+
+uint8_t TOutputBitstream::GetValueFromVector(int iId)
+{
+  return m_fifo[iId];
+}
+
+void TOutputBitstream::Write()
 {
   std::fstream file;
   file.open("test.bin", ios::in | ios::out | ios::binary);
 
-    for (int i = 0; i < n; i++)
+    for (unsigned i = 0; i < m_fifo.size(); i++)
     {
       file.write(reinterpret_cast<char*>(&m_fifo[i]), sizeof(uint8_t));
     }

@@ -10,8 +10,9 @@ class TInputBitstream
 private:
   vector<uint8_t> m_fifo;
   uint8_t im_uiHeldBits;
+  uint32_t uiNumOfBitsTemp;
 public:
-  void Read(int n);
-
+  void Read();
+  void Test(uint8_t uiTestBits, int iCounter);
 };
 
