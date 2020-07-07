@@ -5,26 +5,27 @@
 #include <iostream>
 using namespace std;
 
-#include "BitStream.h"
-#include "LoadBitStream.h"
+#include "TOutputBitstream.h"
+#include "TInputBitstream.h"
 
 int main()
 {
 
-  BitStream* bit_stream = new BitStream();
-  uint8_t vector_test = 122;
-
-  bit_stream->PutN(vector_test,8);
-  vector_test = 200;
-  bit_stream->PutN(vector_test, 8);
-  vector_test = 100;
-  bit_stream->PutN(vector_test, 8);
-  vector_test = 205;
-  bit_stream->PutN(vector_test, 8);
-  bit_stream->Write(2);
+  TOutputBitstream* bit_stream = new TOutputBitstream();
+  //uint8_t vector_test = 122;
+  uint32_t vector_test = 200;
+  uint32_t size = 8;
+ // bit_stream->PutN(4294000000, size);
+ // vector_test = 200;
+ // bit_stream->PutN(4026531840, size);
+ // vector_test = 100;
+  //bit_stream->PutN(4126531840, size);
+  //vector_test = 205;
+  //bit_stream->PutN(4099931840, size);
+  //bit_stream->Write(4);
   //bit_stream->PutN(vector_test, 8);
   //bit_stream->Write(1);
-  LoadBitStream* load_bit_stream = new LoadBitStream();
+  TInputBitstream* load_bit_stream = new TInputBitstream();
   load_bit_stream->Read(1);
 }
 

@@ -4,14 +4,12 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
-class LoadBitStream
+#include <vector>
+class TInputBitstream
 {
 private:
-  uint16_t temp_;
-  uint16_t stream_[255] = { 0 };
-  uint16_t stream_test_[255];
-  int index_stream_;
-  char buffer[16];
+  vector<uint8_t> m_fifo;
+  uint8_t im_uiHeldBits;
 public:
   void Read(int n);
 
