@@ -16,7 +16,7 @@ int main()
   TInputBitstream* load_bit_stream = new TInputBitstream();
 
   /* Implementacja testów */
-  srand(time(NULL));
+  //srand(time(NULL));
   int iAmountTest = 100;
   vector<uint32_t> NumBit;
   vector<uint32_t> ValBit;

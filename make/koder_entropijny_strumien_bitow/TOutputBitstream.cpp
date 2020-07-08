@@ -46,20 +46,48 @@ uint8_t TOutputBitstream::GetValueFromVector(int iId)
 
 void TOutputBitstream::CodeSymbols()
 {
-  uint8_t x;
+  int x=0;
+  int s;
   uint8_t xf;
-  uint8_t xn;
-  cerr << "halo" << endl;
+  double xn;
+  uint8_t buffer;
+  bool BbufferIsEmpty=true;
+
+  uint8_t mask=1;
+ // cerr << int(xf) << endl;
   while (!m_fifo.empty())
   {
-    x = m_fifo.back();
-    cerr << " kolejnySymbol " << int(x) << " " << endl;
-    m_fifo.pop_back();
-    do {
-      xf = x & 0x11;
+  xf = m_fifo.back();
+  cerr << " kolejnySymbol " << int(xf) << " " << endl;
+  m_fifo.pop_back();
+  for (int i = 0; i <= 7; i++)
+  {
+    cerr<<x % 2;
+    x /= 2;
+    mask = 1;
+    mask <<= 7 - i;
+    s = xf & mask ;
+    s >>= 7 - i;
+   // cerr << (int)s << endl;
+    if (s == 0)
+    {
+      x = ceil((x + 1) / (1 - dProbZero_)) - 1;
+    }
+    else x = floor(x / dProbZero_);
+   // s = ceil((x + 1) * dProbZero_) - ceil(x * dProbZero_);
+    //cerr <<"s"<< s << endl;
 
+  }
+  }
+ // 
+ // cerr << s << endl;
+  /*
+  while (!m_fifo.empty())
+  {
+
+      xf = x & 15;
       xn = dProbZero_ * (x >> 4);
-      //cerr << "x xf xn" << x << xf << xn << endl;
+     // cerr << "x xf xn " << int(x) <<"  "<< int (xf) << "  " << double(xn) << endl;
       //cin.get();
       if (xf < dProbZero_)
       {
@@ -71,9 +99,30 @@ void TOutputBitstream::CodeSymbols()
         x -= xn + dProbZero_;
         cerr << "1";
       }
-    } while (x >=16);
-    cerr << endl;
+      if (x < 15)
+      {
+       // cerr <<"mniejsze" 
+          
+          
+        //  << endl;
+        x << 4;
+        if (BbufferIsEmpty == true)
+        {
+          buffer = m_fifo.back();
+          m_fifo.pop_back();
+          BbufferIsEmpty = false;
+          x |= (buffer & 240)>>4;
+        }
+        else 
+        {
+          x |= buffer & 18;
+          BbufferIsEmpty = true;
+        }
+        
+      }
+    
   }
+  */
 }
 
 void TOutputBitstream::Write()
