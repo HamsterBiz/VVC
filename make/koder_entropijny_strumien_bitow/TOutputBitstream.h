@@ -13,13 +13,14 @@ private:
   uint32_t m_uiNumOfHeldBits;   //Liczba bitów w trzymanym bajcie
   int iMask_;
   int iMaskAdd_;
+  double dProbZero_;
 public:
   TOutputBitstream();
   ~TOutputBitstream()=default;
   void PutN(uint32_t uiNumOfBits, uint32_t uiBits);
   unsigned GetSizeBuffor();
   uint8_t GetValueFromVector(int iId);
-
+  void CodeSymbols();
   //void Read(int n);             //Funkcja wczytuj¹ca z pliku n bitów i wpisuj¹ca je do zmiennej uint16_t* stream_test_[255] (zmienna stworzona do testowania - w przysz³oœci zostanie usuniêta)
   void Write();             //Funkcja zapisuj¹ca do pliku n bitów ze zmiennej   uint16_t* stream_[255] 
 };
