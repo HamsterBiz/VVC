@@ -64,7 +64,7 @@ void TOutputBitstream::CodeSymbols()
   m_fifo.pop_back();
   for (int i = 0; i <= 7; i++) //petla wczytuj¹ca bit po bicie z bufora
   {
-    while (x >= 31) // normalizacja - jeœli x > 0001 1111 to zapisz dane 
+    while (x >= 256) // normalizacja - jeœli x > 0001 1111 to zapisz dane 
     {
       save = x % 2;
       cerr << x % 2;
@@ -82,7 +82,7 @@ void TOutputBitstream::CodeSymbols()
     mask = 1;
     mask <<= 7 - i;
     s = xf & mask ;
-    s >>= 7 - i;
+    s >>= (7 - i);
 
     if (s == 0) 
     {
@@ -91,12 +91,21 @@ void TOutputBitstream::CodeSymbols()
     else x = floor(x / dProbZero_);
   }
   }
+  cerr << endl;
+  buffer = 255;
+  cerr << "buffer: " << int(buffer) << endl;
+  buffer = (buffer &x);
+  
+  //cerr <<
+  cerr << x << endl;
+  cerr << " buffer1: " <<int(buffer) << endl;
+  file.write(reinterpret_cast<char*>(&buffer), sizeof(buffer));
   file.close();
-}
+}//dodaæ 
 
 void TOutputBitstream::DecodeSymbols()
 {
-  int x = 0;
+  int x = 255;
   int save = 0;
   int s;
   int xq;
@@ -115,27 +124,9 @@ void TOutputBitstream::DecodeSymbols()
     m_fifo2.push_back(im_uiHeldBits);
   }
   file.close();
-  //cerr << "size" << m_fifo2.size() << endl;
   x = m_fifo2.back();//wczytanie poczatkowych 8 bitów 
+  cerr << " buffer2: " << int(x) << endl;
   m_fifo2.pop_back();
-  /*
-  if (x <= 31) // poczatkowe wczytanie bitow
-  {
-    x = x << 4;
-    if (new_value == true)
-    {//pobierz wartoœc z bufora i wstaw jej po³owe
-      buffer = m_fifo2[counter];
-      m_fifo2.erase(m_fifo2.begin()+counter);
-      counter++;
-      xf |= (buffer & 15);
-      new_value = false;
-    }
-    else
-    {//wstaw drug¹ czesc i przestaw flagê
-      xf |= ((buffer & 240) >> 4);
-      new_value = true;
-    }
-    */
     while (!m_fifo2.empty())
     {
       /*Implementacja z Wikipedii*/
@@ -146,7 +137,7 @@ void TOutputBitstream::DecodeSymbols()
       else {
         x = ceil(x * dProbZero_);
       }
-      while (x <= 31)
+      while (x <= 128)
       {
         x = x << 4;
         if (new_value == true)
@@ -154,12 +145,13 @@ void TOutputBitstream::DecodeSymbols()
           buffer = m_fifo2.back();
           m_fifo2.pop_back();
           counter++;
-          x |= (buffer & 15);
+          x |= ((buffer & 240) >> 4);
+         // x |= (buffer & 15);
           new_value = false;
         }
         else
         {//wstaw drug¹ czêœæ bitów która pozosta³a
-          x |= ((buffer & 240) >> 4);
+          x |= (buffer & 15);
           new_value = true;
         }
       }
