@@ -42,6 +42,7 @@ int main()
   }
   cerr << "symbole" << endl;
   bit_stream->CodeSymbols();
+  bit_stream->DecodeSymbols();
   /* ------------------------------------------------------------- */
 }
 
