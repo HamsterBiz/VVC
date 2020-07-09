@@ -116,8 +116,8 @@ void TOutputBitstream::DecodeSymbols()
   }
   file.close();
   //cerr << "size" << m_fifo2.size() << endl;
-  x = m_fifo2[counter];//wczytanie poczatkowych 8 bitów 
-  m_fifo2.erase(m_fifo2.begin() + counter);
+  x = m_fifo2.back();//wczytanie poczatkowych 8 bitów 
+  m_fifo2.pop_back();
   /*
   if (x <= 31) // poczatkowe wczytanie bitow
   {
@@ -136,7 +136,7 @@ void TOutputBitstream::DecodeSymbols()
       new_value = true;
     }
     */
-    while (size_vector-1<=counter)
+    while (!m_fifo2.empty())
     {
       /*Implementacja z Wikipedii*/
       s = ceil((x + 1) * dProbZero_) - ceil(x * dProbZero_);
@@ -151,8 +151,8 @@ void TOutputBitstream::DecodeSymbols()
         x = x << 4;
         if (new_value == true)
         {//pobierz wartoœc z bufora i wstaw do x po³owe bitów
-          buffer = m_fifo2[counter];
-          m_fifo2.erase(m_fifo2.begin() + counter);
+          buffer = m_fifo2.back();
+          m_fifo2.pop_back();
           counter++;
           x |= (buffer & 15);
           new_value = false;
