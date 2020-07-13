@@ -15,7 +15,22 @@ private:
   uint32_t m_uiNumOfHeldBits;   //Liczba bitów w trzymanym bajcie
   int iMask_;
   int iMaskAdd_;
+  uint8_t im_uiTemp;
   double dProbZero_;
+  int x = 16;
+  int m_iL = 16;
+  int m_ib = 2;
+  int m_iUs = 0;
+  int tab[5] = { 0,1,0,0,0 };
+  int i = 4;
+  int s;
+  int xq;
+  int tempxxx;
+  int amuntbit = 0;
+  uint8_t bits_to_save = 0;
+  int mask_tem = 1;
+  int counter = 0;
+  int counter2 = 0;
 public:
   TOutputBitstream();
   ~TOutputBitstream()=default;

@@ -11,7 +11,8 @@ using namespace std;
 
 int main()
 {
-
+  int i = 151.5f;
+  cerr << "i " << i << endl;
   TOutputBitstream* bit_stream = new TOutputBitstream();
   TInputBitstream* load_bit_stream = new TInputBitstream();
 
@@ -20,7 +21,7 @@ int main()
   int iAmountTest = 5;
   vector<uint32_t> NumBit;
   vector<uint32_t> ValBit;
-  
+  /* Implementacja testów   */
   for (int i = 0; i < iAmountTest; i++)
   {
     NumBit.push_back((rand() % 32) + 0);
@@ -30,8 +31,11 @@ int main()
   {
     bit_stream->PutN(ValBit[i], NumBit[i]);
   }
+
+  //bit_stream->PutN(192, 8);
   bit_stream->Write();
   load_bit_stream->Read();
+  /*  */
   int iTemp = int(bit_stream->GetSizeBuffor());
   cerr << "testowanie" << endl;
   int counter = 0;
@@ -41,8 +45,10 @@ int main()
     counter++;
   }
   cerr << "symbole" << endl;
+
+
   bit_stream->CodeSymbols();
-  bit_stream->DecodeSymbols();
+  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();  bit_stream->DecodeSymbols();
   /* ------------------------------------------------------------- */
 }
 
