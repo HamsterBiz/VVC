@@ -3,7 +3,7 @@
 TOutputBitstream::TOutputBitstream()
 {
   m_uiNumOfHeldBits = 7;
-  dProbZero_ = 0.3;
+  dProbZero_ =4;
 }
 
 void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
@@ -27,6 +27,7 @@ void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
     if (m_uiNumOfHeldBits > 7) //  buffor jest pe³ny wpisz go do vektora
     {
       m_uiNumOfHeldBits = 7;
+      cerr << int(m_uiHeldBits) << endl;
       m_fifo.push_back(m_uiHeldBits);
       m_uiHeldBits = 0;
     }
@@ -46,150 +47,108 @@ uint8_t TOutputBitstream::GetValueFromVector(int iId)
 
 void TOutputBitstream::CodeSymbols()
 {
-  int x=0;
-  int save =0 ;
-  int s;
-  uint8_t xf;
-
-  uint8_t buffer=0;
-  uint8_t space=7;
-
-  std::fstream file;
-  file.open("test2.bin", ios::in | ios::out | ios::binary);
-  uint8_t mask=1;
-  while (!m_fifo.empty())
-  {
-  xf = m_fifo.back();
-  cerr << " " << int(xf) << endl ;
-  m_fifo.pop_back();
-  for (int i = 0; i <= 7; i++) //petla wczytuj¹ca bit po bicie z bufora
-  {
-    while (x >= 256) // normalizacja - jeœli x > 0001 1111 to zapisz dane 
-    {
-      save = x % 2;
-      cerr << x % 2;
-      buffer |= ((save) << space);
-      space--;
-      if (space > 7)
-      {
-        file.write(reinterpret_cast<char*>(&buffer), sizeof(buffer)); //zapis binarnych wartoœci do pliku - sprawdzone wartosci pojawiaj¹ce siê w konsoli faktycznie sa zapisane do pliku 
-        space = 7;
-        buffer = 0;
-      }
-      x /= 2;
-    }
-   
-    mask = 1;
-    mask <<= 7 - i;
-    s = xf & mask ;
-    s >>= (7 - i);
-
-    if (s == 0) 
-    {
-      x = ceil((x + 1) / (1 - dProbZero_)) - 1; 
-    }
-    else x = floor(x / dProbZero_);
-  }
-  }
-  cerr << endl;
-  buffer = 255;
-  cerr << "buffer: " << int(buffer) << endl;
-  buffer = (buffer &x);
+  int iSizeQueue = m_fifo.size();
+ // cerr << "rozmiar " << iSizeQueue << endl;
   
-  //cerr <<
-  cerr << x << endl;
-  cerr << " buffer1: " <<int(buffer) << endl;
-  file.write(reinterpret_cast<char*>(&buffer), sizeof(buffer));
-  file.close();
+  while((iSizeQueue - 1)>=0){
+  im_uiTemp = m_fifo[iSizeQueue - 1];
+  iAmountSaveValue++;
+  iSizeQueue--;
+  cerr << "wartoœæ : " << int(im_uiTemp) << endl;
+  
+  counter = 0;
+  while (counter < 8) {
+
+    mask_tem = 1;
+    mask_tem <<= counter;
+    s = mask_tem & im_uiTemp;
+    //cerr << "test bitow" << s << endl;
+    counter++;
+    m_iUs = 0;
+    if (s == 0) m_iUs = m_ib * (m_iL - dProbZero_);
+    else m_iUs = m_ib * dProbZero_;
+    while (x >= m_iUs)
+    {
+      cerr << "s " << x % m_ib << endl;
+      bits_to_save <<= 1;
+      bits_to_save |= (x % m_ib);
+     // cerr << int(bits_to_save) << endl;
+      iAmuntBit++;
+      if (iAmuntBit > 7)
+      {
+        //cerr << "wysyw³a : " << endl;
+        m_fifo2.push_back(bits_to_save);
+        bits_to_save = 0;
+        iAmuntBit = 0;
+      }
+      x = floor(x/m_ib);
+    }
+    if (s == 0) x = floor(((x + 1) * m_iL - 1) / (m_iL - dProbZero_));
+    else x = floor((x * m_iL / dProbZero_));
+  }
+  }
+  //iAmountSaveValue++;
 }//dodaæ 
 
 void TOutputBitstream::DecodeSymbols()
 {
-  int x = 255;
-  int save = 0;
-  int s;
-  int xq;
-  uint8_t xf;
-  uint8_t xp;
-  int wynik=0;
-  int counter = 0;
-  uint8_t buffer = 0;
-  bool new_value = true;
-  uint8_t mask = 1;
-  int size_vector = m_fifo2.size();
-  std::ifstream file;
-  file.open("test2.bin", ios::in | ios::out | ios::binary);
-  while (file.read(reinterpret_cast<char*>(&im_uiHeldBits), sizeof(uint8_t)))
-  {
-    m_fifo2.push_back(im_uiHeldBits);
-  }
-  file.close();
-  x = m_fifo2.back();//wczytanie poczatkowych 8 bitów 
-  cerr << " buffer2: " << int(x) << endl;
-  m_fifo2.pop_back();
-    while (!m_fifo2.empty())
+  int counter3 = 0;
+  //int zmienna_od_warunku = iAmuntBit;
+  while (iAmountSaveValue) {
+    counter3 = 0;
+    while (counter3 < 8)
     {
-      /*Implementacja z Wikipedii*/
-      s = ceil((x + 1) * dProbZero_) - ceil(x * dProbZero_);
-      cerr << (int(s));
-      if (s == 0)
-        x = x - ceil(x * dProbZero_);
-      else {
-        x = ceil(x * dProbZero_);
-      }
-      while (x <= 128)
+      s = floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL);
+      xq = floor((x * dProbZero_ - 1) / m_iL + 1);
+      if (s == 0) x = x - xq;
+      else x = xq;
+
+      while (x < m_iL)
       {
-        x = x << 4;
-        if (new_value == true)
-        {//pobierz wartoœc z bufora i wstaw do x po³owe bitów
-          buffer = m_fifo2.back();
+        if (iAmuntBit == 0 )
+        {
+          //cerr << "tutaj" << endl;
+          bits_to_save = m_fifo2.back();
           m_fifo2.pop_back();
-          counter++;
-          x |= ((buffer & 240) >> 4);
-         // x |= (buffer & 15);
-          new_value = false;
+          iAmuntBit = 8;
+          //counter2 = 0;
         }
-        else
-        {//wstaw drug¹ czêœæ bitów która pozosta³a
-          x |= (buffer & 15);
-          new_value = true;
+        if (counter2 < iAmuntBit)
+        {
+          //cerr << "ilosc bitow " << int(iAmuntBit) << endl;
+          //cerr << "bity w zmiennej : " << int(bits_to_save) << endl;
+          iLoadBit = (bits_to_save & (1 << counter2));
+          iLoadBit >>= counter2;
+          counter2++;
+          //cerr << "load bit:" << iLoadBit << endl;
+          if (counter2 == iAmuntBit)
+          {
+            if (!m_fifo2.empty())
+            {
+             // cerr << "tutaj" << endl;
+              bits_to_save = m_fifo2.back();
+              m_fifo2.pop_back();
+              counter2 = 0;
+              iAmuntBit = 8;
+            }
+          }
+          //cerr << "counter2: " << counter2 << "iAmountBit" << iAmuntBit << endl;
         }
-      }
-    }
-  //}
-    /*implementacja z prezentacji - nie dzia³aj¹ca
-      xp = xf * (dProbZero_ - 1);
-      wynik = ((xp & 31) >= dProbZero_ - 1);
-      xp >>= 4;
-      if (wynik == 1)
-      {
-        xf = xp;
-      }
-      else
-      {
-        xf -= xp;
-      }
-      cerr << wynik;
-      while (xf <= 31)
-      {
-        xf=xf << 4;
-        if (new_value == true)
-        {//pobierz wartoœc z bufora i wstaw jej po³owe
-          buffer= m_fifo2.back();
-          m_fifo2.pop_back();
-          xf |= (buffer & 15);
-          new_value = false;
-        }
-        else
-        {//wstaw drug¹ czesc i przestaw flagê
-          xf |= ((buffer & 240)>>4);
-          new_value = true;
-        }
+        
+        x = x * m_ib + iLoadBit;
 
       }
-    }
-    */
 
+      cerr << " s : " << s << endl;
+      counter3++;
+    }
+    cerr << "-------------" << endl;
+    //int iSizeQueue = m_fifo.size();
+    
+    iAmuntBit = 8;
+    //zmienna_od_warunku = 8;
+    iAmountSaveValue--;
+  }
 }
 
 void TOutputBitstream::Write()
