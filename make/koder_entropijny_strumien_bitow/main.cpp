@@ -32,8 +32,9 @@ int main()
  // {
  //   bit_stream->PutN(ValBit[i], NumBit[i]);
   //}
-    bit_stream->PutN(323900928, 8);
-   //bit_stream->PutN(3590324224,8);
+   bit_stream->PutN(323900928, 8);
+   bit_stream->PutN(35329024224,8);
+   bit_stream->PutN(352329024224, 8);
   //bit_stream->PutN(192, 8);
   //bit_stream->Write();
   //load_bit_stream->Read();

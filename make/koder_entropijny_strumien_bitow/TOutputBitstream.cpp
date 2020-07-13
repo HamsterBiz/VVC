@@ -3,7 +3,7 @@
 TOutputBitstream::TOutputBitstream()
 {
   m_uiNumOfHeldBits = 7;
-  dProbZero_ = 4;
+  dProbZero_ =4;
 }
 
 void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
@@ -76,15 +76,15 @@ void TOutputBitstream::CodeSymbols()
       iAmuntBit++;
       if (iAmuntBit > 7)
       {
-        cerr << "wysyw³a : " << endl;
+        //cerr << "wysyw³a : " << endl;
         m_fifo2.push_back(bits_to_save);
         bits_to_save = 0;
         iAmuntBit = 0;
       }
-      x =x/m_ib;
+      x = floor(x/m_ib);
     }
-    if (s == 0) x = ((x + 1) * m_iL - 1) / (m_iL - dProbZero_);
-    else x = (x * m_iL / dProbZero_);
+    if (s == 0) x = floor(((x + 1) * m_iL - 1) / (m_iL - dProbZero_));
+    else x = floor((x * m_iL / dProbZero_));
   }
   }
   //iAmountSaveValue++;
@@ -105,33 +105,36 @@ void TOutputBitstream::DecodeSymbols()
 
       while (x < m_iL)
       {
-        if (iAmuntBit == 0)
+        if (iAmuntBit == 0 )
         {
-          cerr << "tutaj" << endl;
+          //cerr << "tutaj" << endl;
           bits_to_save = m_fifo2.back();
           m_fifo2.pop_back();
           iAmuntBit = 8;
           //counter2 = 0;
         }
-        if (counter2 <= iAmuntBit)
+        if (counter2 < iAmuntBit)
         {
+          //cerr << "ilosc bitow " << int(iAmuntBit) << endl;
+          //cerr << "bity w zmiennej : " << int(bits_to_save) << endl;
           iLoadBit = (bits_to_save & (1 << counter2));
           iLoadBit >>= counter2;
           counter2++;
+          //cerr << "load bit:" << iLoadBit << endl;
+          if (counter2 == iAmuntBit)
+          {
+            if (!m_fifo2.empty())
+            {
+             // cerr << "tutaj" << endl;
+              bits_to_save = m_fifo2.back();
+              m_fifo2.pop_back();
+              counter2 = 0;
+              iAmuntBit = 8;
+            }
+          }
           //cerr << "counter2: " << counter2 << "iAmountBit" << iAmuntBit << endl;
         }
-        else
-        {
-          //cerr << "warunek " << m_fifo2.empty() << endl;
-          if (!m_fifo2.empty())
-          {
-            //cerr << "tutaj" << endl;
-            bits_to_save = m_fifo2.back();
-            m_fifo2.pop_back();
-            counter2 = 0;
-          }
-
-        }
+        
         x = x * m_ib + iLoadBit;
 
       }
