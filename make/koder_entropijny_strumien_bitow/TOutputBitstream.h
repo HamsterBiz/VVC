@@ -21,12 +21,11 @@ private:
   int m_iL = 16;
   int m_ib = 2;
   int m_iUs = 0;
-  int tab[5] = { 0,1,0,0,0 };
-  int i = 4;
   int s;
   int xq;
-  int tempxxx;
-  int amuntbit = 0;
+  int iLoadBit;
+  int iAmuntBit = 0;
+  int iAmountSaveValue = 0;
   uint8_t bits_to_save = 0;
   int mask_tem = 1;
   int counter = 0;

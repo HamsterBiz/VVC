@@ -27,6 +27,7 @@ void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
     if (m_uiNumOfHeldBits > 7) //  buffor jest pe³ny wpisz go do vektora
     {
       m_uiNumOfHeldBits = 7;
+      cerr << int(m_uiHeldBits) << endl;
       m_fifo.push_back(m_uiHeldBits);
       m_uiHeldBits = 0;
     }
@@ -46,10 +47,16 @@ uint8_t TOutputBitstream::GetValueFromVector(int iId)
 
 void TOutputBitstream::CodeSymbols()
 {
-
-  //im_uiTemp = m_fifo[m_fifo.size()-1];
-  im_uiTemp = 128;
+  int iSizeQueue = m_fifo.size();
+ // cerr << "rozmiar " << iSizeQueue << endl;
+  
+  while((iSizeQueue - 1)>=0){
+  im_uiTemp = m_fifo[iSizeQueue - 1];
+  iAmountSaveValue++;
+  iSizeQueue--;
   cerr << "wartoœæ : " << int(im_uiTemp) << endl;
+  
+  counter = 0;
   while (counter < 8) {
 
     mask_tem = 1;
@@ -65,43 +72,80 @@ void TOutputBitstream::CodeSymbols()
       cerr << "s " << x % m_ib << endl;
       bits_to_save <<= 1;
       bits_to_save |= (x % m_ib);
-      cerr << int(bits_to_save) << endl;
-      amuntbit++;
-      if (amuntbit > 6)
+     // cerr << int(bits_to_save) << endl;
+      iAmuntBit++;
+      if (iAmuntBit > 7)
       {
-        cerr << "ERROR" << endl;
+        cerr << "wysyw³a : " << endl;
+        m_fifo2.push_back(bits_to_save);
+        bits_to_save = 0;
+        iAmuntBit = 0;
       }
       x =x/m_ib;
     }
     if (s == 0) x = ((x + 1) * m_iL - 1) / (m_iL - dProbZero_);
     else x = (x * m_iL / dProbZero_);
   }
-  cerr <<"x koniec:"<< int(x) << endl;
-  cerr << "bity zapisane " << int(bits_to_save) << endl;
+  }
+  //iAmountSaveValue++;
 }//dodaæ 
 
 void TOutputBitstream::DecodeSymbols()
 {
-  cerr << " x " << x << endl;
-  cerr << "wynik s: " << floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL)<<endl;
-  s = floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL);
-  xq = floor((x * dProbZero_ - 1) / m_iL + 1);
-  if (s == 0) x = x - xq;
-  else x = xq;
-
-  while (x < m_iL)
-  {
-    if (counter2 <= amuntbit)
+  int counter3 = 0;
+  //int zmienna_od_warunku = iAmuntBit;
+  while (iAmountSaveValue) {
+    counter3 = 0;
+    while (counter3 < 8)
     {
-      tempxxx = (bits_to_save & (1 << counter2));
-      tempxxx >>= counter2;
-      counter2++;
-    }
-    x = x * m_ib + tempxxx;
-   //i--;
-  }
+      s = floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL);
+      xq = floor((x * dProbZero_ - 1) / m_iL + 1);
+      if (s == 0) x = x - xq;
+      else x = xq;
 
-  cerr << " s : "<<s << endl;
+      while (x < m_iL)
+      {
+        if (iAmuntBit == 0)
+        {
+          cerr << "tutaj" << endl;
+          bits_to_save = m_fifo2.back();
+          m_fifo2.pop_back();
+          iAmuntBit = 8;
+          //counter2 = 0;
+        }
+        if (counter2 <= iAmuntBit)
+        {
+          iLoadBit = (bits_to_save & (1 << counter2));
+          iLoadBit >>= counter2;
+          counter2++;
+          //cerr << "counter2: " << counter2 << "iAmountBit" << iAmuntBit << endl;
+        }
+        else
+        {
+          //cerr << "warunek " << m_fifo2.empty() << endl;
+          if (!m_fifo2.empty())
+          {
+            //cerr << "tutaj" << endl;
+            bits_to_save = m_fifo2.back();
+            m_fifo2.pop_back();
+            counter2 = 0;
+          }
+
+        }
+        x = x * m_ib + iLoadBit;
+
+      }
+
+      cerr << " s : " << s << endl;
+      counter3++;
+    }
+    cerr << "-------------" << endl;
+    //int iSizeQueue = m_fifo.size();
+    
+    iAmuntBit = 8;
+    //zmienna_od_warunku = 8;
+    iAmountSaveValue--;
+  }
 }
 
 void TOutputBitstream::Write()
