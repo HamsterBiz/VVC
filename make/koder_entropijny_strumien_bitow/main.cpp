@@ -39,7 +39,7 @@ int main()
   vector<int> iBitsVector;
   for (int i = 0; i < iBitsToCode->size(); i++)
   {
-    iBit = ans->Decode(4);
+    iBit = ans->Decode(6);
     iBitsVector.push_back(iBit);
    }
   cerr << "0-17" << endl;
@@ -52,8 +52,22 @@ int main()
   cerr << "0-17" << endl;
   for (int i = 0; i < 17; i++)
   {
-    cerr << "s" << iBitsVector.back() << " ";
+    cerr << iBitsVector.back() << " ";
     iBitsVector.pop_back();
+    // cerr << iBitsVector[i] << " ";
+  }
+  cerr << "0-17" << endl;
+  for (int i = 0; i < 17; i++)
+  {
+    //cerr << "s" << iBitsToCode->at(i)<<" ";
+    cerr << iBitsVector[i] << " ";
+    //iBitsVector.pop_back();
+  }
+  cerr << "0-17" << endl;
+  for (int i = 0; i < 17; i++)
+  {
+    cerr << iBitsToCode->back() << " ";
+    iBitsToCode->pop_back();
     // cerr << iBitsVector[i] << " ";
   }
 

@@ -29,14 +29,11 @@ void TInputImage::ReadVideo()
   {
     fread(m_ibBuffor.buf_, sizeof(unsigned char), (m_iWidth * m_iHeight) * 1.5, m_fFile);
 
-    for (int i = m_iCounter; i > -1; i--) //wczytujemy próbki obrazu od koñca
+    for (int i = m_iCounter; i >= 0; i--) //wczytujemy próbki obrazu od koñca
     {
       m_uiImageValues.push_back(m_ibBuffor.buf_[i]);
     }
   }
-
-  //fwrite(editor.buf_, sizeof(unsigned char), (width_ * height_) * 1.5, file_name_edit_);
- // cerr << "counter: " << counter << endl;
   fclose(m_fFile);
   free(m_ibBuffor.buf_);
 }
