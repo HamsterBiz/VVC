@@ -25,10 +25,37 @@ int main()
   image->ReadVideo();
   uiImageValues = image->GetVectorImage();
   //int counter=image->GetCounter();
+  vector<int>* iBitsToCode;
+  iBitsToCode=bit_stream->SplitIntoBits(uiImageValues);
 
-  bit_stream->SplitIntoBits(uiImageValues);
- // for (int i = 0; i < counter; i++)
- // {
+  for (int i = 0; i < iBitsToCode->size(); i++)
+  {
+    ans->Code(6, iBitsToCode->at(i));
+    //m_uiTest1.pop_back();
+  }
+  cerr << "dekodowanie" << endl;
+  cerr << ans->GetBitAmout() << endl;
+  int iBit;
+  vector<int> iBitsVector;
+  for (int i = 0; i < iBitsToCode->size(); i++)
+  {
+    iBit = ans->Decode(4);
+    iBitsVector.push_back(iBit);
+   }
+  cerr << "0-17" << endl;
+  for (int i = 0; i < 17; i++)
+  {
+    //cerr << "s" << iBitsToCode->at(i)<<" ";
+    cerr << iBitsToCode->at(i) << " ";
+    //iBitsVector.pop_back();
+  }
+  cerr << "0-17" << endl;
+  for (int i = 0; i < 17; i++)
+  {
+    cerr << "s" << iBitsVector.back() << " ";
+    iBitsVector.pop_back();
+    // cerr << iBitsVector[i] << " ";
+  }
 
   //}
   

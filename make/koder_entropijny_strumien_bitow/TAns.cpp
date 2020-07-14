@@ -12,7 +12,7 @@ TAns::TAns(int iL, int ib, int iXstate)
 
 void TAns::Code(int iP1, int s)
 {
-      cerr <<"s"<< int(s)<< " " ;
+      //cerr <<"s"<< int(s)<< " " ;
       //m_uiTest1.push_back(s); //bufory przechowywaæ na zewn¹trz
       m_iUs = 0;
       if (s == 0) m_iUs = m_ib * (m_iL - iP1);
@@ -45,9 +45,14 @@ int TAns::Decode(int iP1)
         }
         else break;
       }
-      cerr << "s" << m_iS << " ";
+     // cerr << "s" << m_iS << " ";
       return m_iS;
       
+}
+
+int TAns::GetBitAmout()
+{
+  return m_uiCodeValue.size();
 }
 
 

@@ -71,21 +71,26 @@ vector<int>* TOutputBitstream::SplitIntoBits(vector<uint8_t>* VectorToSplit)
   while (!(VectorToSplit->empty()))
   {
     temp = VectorToSplit->back();
-    //cerr << "wartoœæ " << int(temp) << endl;
+   // cerr << "wartoœæ " << int(temp) << endl;
     VectorToSplit->pop_back();
      while(i>=0)
     {
-      //cerr << temp % 2 << " ";
+     // cerr << temp % 2 << " ";
+       if (temp % 2)
+       {
+         iOneAmount++;
+       }
       m_iFifoCode.push_back(temp % 2);
       temp /= 2;
       i--;
+      iAllAmount++;
     }
     i = 7;
   }
   int size2 = m_iFifoCode.size();
-  cerr << "size 1: " << size << " size2: " << size2 << endl;
+  cerr << "1: " << iOneAmount << " All: " << iAllAmount << endl;
 
-  return nullptr;
+  return &m_iFifoCode;
 }
 
 unsigned TOutputBitstream::GetSizeBuffor()

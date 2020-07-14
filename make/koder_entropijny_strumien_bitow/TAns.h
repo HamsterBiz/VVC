@@ -11,6 +11,7 @@ public:
   TAns(int iL, int ib, int iXstate);
   void Code(int iP1, int s);
   int Decode(int iP1);
+  int GetBitAmout();
 private:
   int m_iL;//16
   int m_ib;

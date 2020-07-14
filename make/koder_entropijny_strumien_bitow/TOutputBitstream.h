@@ -17,7 +17,8 @@ private:
   int iMask_;
   int iMaskAdd_;
   uint8_t im_uiTemp;
-
+  int iOneAmount = 0;
+  int iAllAmount = 0;
 public:
   TOutputBitstream();
   ~TOutputBitstream()=default;
