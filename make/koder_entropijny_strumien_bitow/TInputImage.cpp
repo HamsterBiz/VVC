@@ -1,45 +1,47 @@
 #include "TInputImage.h"
 
-TInputImage::TInputImage(int width, int height, int amount_frame)
+TInputImage::TInputImage(int iWidth, int iHeight, int iAmountFrame, string sFileName)
 {
-  width_ = width;
-  height_ = height;
-  amount_frame_ = amount_frame;
+  m_iWidth = iWidth;
+  m_iHeight = iHeight;
+  m_iAmountFrame = iAmountFrame;
+  m_sFilename = sFileName;
+ // m_iLumaAmount= m_iWidth* m_iHeight;
+  //m_iChromaAmount=m_iLumaAmount/4;
+  //m_bLuma=true;
+  //m_bChroma=true;
+  m_iCounter = (m_iWidth * m_iHeight * 1.5)-1;
+}
+
+int TInputImage::GetCounter()
+{
+  return m_iWidth* m_iHeight*1.5;
 }
 
 void TInputImage::ReadVideo()
 {
   
-  file_name_ = fopen("frame1_176x144.yuv", "rb");
-  buffor.buf_ = (unsigned char*)malloc(width_ * height_ * 1.5 * sizeof(unsigned  char));
-  editor.buf_ = (unsigned char*)malloc(width_ * height_ * 1.5 * sizeof(unsigned  char));
+  
+  m_fFile = fopen(m_sFilename.c_str(), "rb");
+  m_ibBuffor.buf_ = (unsigned char*)malloc(m_iWidth * m_iHeight * 1.5 * sizeof(unsigned  char));
 
-  int counter = 0;
-  for (int f = 0; f < amount_frame_; f++)
+  for (int f = 0; f < m_iAmountFrame; f++)
   {
-    fread(buffor.buf_, sizeof(unsigned char), (width_ * height_) * 1.5, file_name_);
+    fread(m_ibBuffor.buf_, sizeof(unsigned char), (m_iWidth * m_iHeight) * 1.5, m_fFile);
 
-    for (int j = 0; j < height_; j++)
+    for (int i = m_iCounter; i > -1; i--) //wczytujemy próbki obrazu od koñca
     {
-      for (int i = 0; i < width_; i++)
-      {
-        unsigned int y = buffor.buf_[j * width_ + i];
-        unsigned int u = buffor.buf_[(j / 2) * (width_ / 2) + (i / 2) + (width_ * height_)];
-        unsigned int v = buffor.buf_[(j / 2) * (width_ / 2) + (i / 2) + (width_ * height_) + ((width_ * height_) / 4)];
-        cerr << "y: " << "buffor [ " << j * width_ + i << " ]" << endl;
-        cerr << "u: " << "buffor [ " << (j / 2) * (width_ / 2) + (i / 2) + (width_ * height_) << " ]" << endl;
-        cerr << "v: " << "buffor [ " << (j / 2) * (width_ / 2) + (i / 2) + (width_ * height_) + ((width_ * height_) / 4) << " ]" << endl;
-        printf("Y: %d, u: %d, v: %d  ", y, u, v);
-        cerr << endl;
-        counter++;
-        //  cin.get();
-      }
-
+      m_uiImageValues.push_back(m_ibBuffor.buf_[i]);
     }
   }
 
   //fwrite(editor.buf_, sizeof(unsigned char), (width_ * height_) * 1.5, file_name_edit_);
-  cerr << "counter: " << counter << endl;
-  fclose(file_name_);
-  free(buffor.buf_);
+ // cerr << "counter: " << counter << endl;
+  fclose(m_fFile);
+  free(m_ibBuffor.buf_);
+}
+
+vector<uint8_t>* TInputImage::GetVectorImage()
+{
+  return &m_uiImageValues;
 }
