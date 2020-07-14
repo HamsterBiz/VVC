@@ -10,6 +10,8 @@ class TOutputBitstream
 private:
   vector<uint8_t> m_fifo;       //buffor n wpe³ni wype³nione bajty
   vector<uint8_t> m_fifo2;       //buffor n wpe³ni wype³nione bajty
+  vector<uint8_t> m_test1;
+  vector<uint8_t> m_test2;
   uint8_t im_uiHeldBits;
   uint8_t m_uiHeldBits;         //Bufor na nie wpe³ni wype³nione bajty
   uint32_t m_uiNumOfHeldBits;   //Liczba bitów w trzymanym bajcie
@@ -30,6 +32,8 @@ private:
   int mask_tem = 1;
   int counter = 0;
   int counter2 = 0;
+  uint8_t im_uResultSave = 0;
+  int iCounterResult = 0;
 public:
   TOutputBitstream();
   ~TOutputBitstream()=default;
@@ -38,6 +42,7 @@ public:
   uint8_t GetValueFromVector(int iId);
   void CodeSymbols();
   void DecodeSymbols();
+  void CheckTheCodingIsCorrect();
   //void Read(int n);             //Funkcja wczytuj¹ca z pliku n bitów i wpisuj¹ca je do zmiennej uint16_t* stream_test_[255] (zmienna stworzona do testowania - w przysz³oœci zostanie usuniêta)
   void Write();             //Funkcja zapisuj¹ca do pliku n bitów ze zmiennej   uint16_t* stream_[255] 
 };
