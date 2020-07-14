@@ -16,7 +16,7 @@ int main()
 
   /* Implementacja testów */
   srand(time(NULL));
-  int iAmountTest =20;
+  int iAmountTest =50;
   vector<uint32_t> NumBit;
   vector<uint32_t> ValBit;
   /* Implementacja testów   */

@@ -33,6 +33,34 @@ void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
     }
   }
 
+}           
+
+void TOutputBitstream::PutN8Bit(uint8_t uiNumOfBits, uint8_t uiBits)
+{
+  for (int i = 0; i < uiBits; i++)
+  {
+    iMask_ = 1;
+    iMask_ <<= (7 - i); //sprawdzanie czy na pierwszej pozycji uiNumOfBits (bit najbardziej znacz¹cy znajduje siê 1)
+
+    if (uiNumOfBits & iMask_) //tak 
+    {
+      iMaskAdd_ = 1;
+      iMaskAdd_ <<= m_uiNumOfHeldBits;
+      m_uiHeldBits |= iMaskAdd_;
+      m_uiNumOfHeldBits--;
+    }
+    else // nie
+    {
+      m_uiNumOfHeldBits--;
+    }
+    if (m_uiNumOfHeldBits > 7) //  buffor jest pe³ny wpisz go do vektora
+    {
+      m_uiNumOfHeldBits = 7;
+      cerr << int(m_uiHeldBits) << endl;
+      m_fifo.push_back(m_uiHeldBits);
+      m_uiHeldBits = 0;
+    }
+  }
 }
 
 unsigned TOutputBitstream::GetSizeBuffor()
@@ -47,13 +75,13 @@ uint8_t TOutputBitstream::GetValueFromVector(int iId)
 
 void TOutputBitstream::CodeSymbols()
 {
-  int iSizeQueue = m_fifo.size();
-  
-  while((iSizeQueue - 1)>=0){
-  im_uiTemp = m_fifo[iSizeQueue - 1];
-  m_test1.push_back(im_uiTemp);
-  iAmountSaveValue++;
+  int iSizeQueue = m_fifo.size(); 
   iSizeQueue--;
+  while((iSizeQueue)>=0){  //Wykonuj do czasu a¿ wszystkie wartoœci nie bêd¹ zakodowane
+  im_uiTemp = m_fifo[iSizeQueue]; //pobranie ostatniego elementu z kolejki
+  m_test1.push_back(im_uiTemp);  //wysy³anie elemntu na wektor który bêdzie testowa³ poprawnoœæ dzia³ania programu
+  iAmountSaveValue++; // zwiêkszenie iloœci elemntów które trzeba odkodowaæ
+  iSizeQueue--; // zmiejszenie indeksu aby nastêpny pobrany elemnt by³ prawid³owy
  // cerr << "wartoœæ : " << int(im_uiTemp) << endl;
   
   counter = 0;
@@ -89,7 +117,7 @@ void TOutputBitstream::CodeSymbols()
 void TOutputBitstream::DecodeSymbols()
 {
   int counter3 = 0;
-  while (iAmountSaveValue) {
+  while (iAmountSaveValue) { //
     counter3 = 0;
     while (counter3 < 8)
     {
