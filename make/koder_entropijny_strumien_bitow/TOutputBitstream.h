@@ -18,8 +18,8 @@ private:
   int iMask_;
   int iMaskAdd_;
   uint8_t im_uiTemp;
-  double dProbZero_;
-  int x = 16;
+  int dProbZero_;
+  int x = 16; // pole klasy literka M
   int m_iL = 16;//16
   int m_ib = 2;
   int m_iUs = 0;

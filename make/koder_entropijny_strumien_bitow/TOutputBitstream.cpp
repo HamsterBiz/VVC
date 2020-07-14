@@ -85,11 +85,12 @@ void TOutputBitstream::CodeSymbols()
  // cerr << "wartoœæ : " << int(im_uiTemp) << endl;
   
   counter = 0;
-  while (counter < 8) {
+  while (counter < 8) { // wyci¹¹gn¹æ do innej klasy prawdopodobienstwo w funkcji wejsciowej 
 
     mask_tem = 1;
     mask_tem <<= counter;
-    s = mask_tem & im_uiTemp;
+    s = mask_tem & im_uiTemp; //potêga dwójki
+    s >>= counter;
     counter++;
     m_iUs = 0;
     if (s == 0) m_iUs = m_ib * (m_iL - dProbZero_);
@@ -121,8 +122,8 @@ void TOutputBitstream::DecodeSymbols()
     counter3 = 0;
     while (counter3 < 8)
     {
-      s = floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL);
-      xq = floor((x * dProbZero_ - 1) / m_iL + 1);
+      s = floor(((x + 1) * dProbZero_ - 1) / m_iL) - floor((x * dProbZero_ - 1) / m_iL); //czy jednka musi byc wewnatrz czy na zewn¹trz flora
+      xq = floor((x * dProbZero_ - 1) / m_iL + 1); 
       if (s == 0) x = x - xq;
       else x = xq;
 
