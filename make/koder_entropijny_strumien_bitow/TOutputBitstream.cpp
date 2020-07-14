@@ -3,7 +3,6 @@
 TOutputBitstream::TOutputBitstream()
 {
   m_uiNumOfHeldBits = 7;
-  dProbZero_ =4;//8
 }
 
 void TOutputBitstream::PutN(uint32_t uiNumOfBits, uint32_t uiBits)
@@ -61,6 +60,32 @@ void TOutputBitstream::PutN8Bit(uint8_t uiNumOfBits, uint8_t uiBits)
       m_uiHeldBits = 0;
     }
   }
+}
+
+vector<int>* TOutputBitstream::SplitIntoBits(vector<uint8_t>* VectorToSplit)
+{
+  int temp;
+  int counter;
+  int i = 7;
+  int size = VectorToSplit->size();
+  while (!(VectorToSplit->empty()))
+  {
+    temp = VectorToSplit->back();
+    //cerr << "wartoœæ " << int(temp) << endl;
+    VectorToSplit->pop_back();
+     while(i>=0)
+    {
+      //cerr << temp % 2 << " ";
+      m_iFifoCode.push_back(temp % 2);
+      temp /= 2;
+      i--;
+    }
+    i = 7;
+  }
+  int size2 = m_iFifoCode.size();
+  cerr << "size 1: " << size << " size2: " << size2 << endl;
+
+  return nullptr;
 }
 
 unsigned TOutputBitstream::GetSizeBuffor()

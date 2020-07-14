@@ -12,7 +12,7 @@ TAns::TAns(int iL, int ib, int iXstate)
 
 void TAns::Code(int iP1, int s)
 {
-      //cerr <<"s"<< int(s)<< " " ;
+      cerr <<"s"<< int(s)<< " " ;
       //m_uiTest1.push_back(s); //bufory przechowywaæ na zewn¹trz
       m_iUs = 0;
       if (s == 0) m_iUs = m_ib * (m_iL - iP1);
@@ -45,25 +45,9 @@ int TAns::Decode(int iP1)
         }
         else break;
       }
-     // cerr << "s" << m_iS << " ";
+      cerr << "s" << m_iS << " ";
       return m_iS;
       
 }
 
-void TAns::Test(int counter)
-{
-  cerr << endl;
-  cerr << endl;
-  //cerr << "rozmiar1 : " << m_uiTest1.size() << " rozmiar2 : " << m_uiTest2.size() << endl;
- // int iSizeVector = m_uiTest1.size() - 1;
-  //for (unsigned i = 0; i <= iSizeVector; i++)
-  //{
- //   if (m_uiTest1[i] == m_uiTest2[iSizeVector - i]) cerr << "t";
-  //  else
- //   {
-   //   cerr << "Error at i: " <<i<<" iSizeVector-i : "<< iSizeVector - i<< endl;
-   //   cin.get();
-   // }
- // }
-}
 

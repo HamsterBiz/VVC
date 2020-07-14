@@ -15,7 +15,7 @@ static void TestAns(TAns* ans,int iAmountTestValue)
     ans->Code(4, m_uiTest1[i]);
     //m_uiTest1.pop_back();
   }
-
+  cerr << "dekodowanie" << endl;
   for (int i = 0; i < m_uiTest1.size(); i++)
   {
     temp = ans->Decode(4);

@@ -4,17 +4,23 @@
 #include <math.h>
 using namespace std;
 #include <iostream>
+#include <vector>
 #pragma warning(disable : 4996)
 
 class TInputImage
 {
 private:
-  FILE* file_name_; // zmienna przechowuj¹ca plik
-  //FILE* file_name_edit_;
-  //char* video_name_;
-  int amount_frame_;
-  int width_;
-  int height_;
+  FILE* m_fFile; // zmienna przechowuj¹ca plik
+  int m_iAmountFrame;
+  int m_iWidth;
+  int m_iHeight;
+  string m_sFilename;
+  //int m_iLumaAmount;
+  //int m_iChromaAmount;
+  int m_iCounter;
+ // bool m_bLuma;
+  //bool m_bChroma;
+  vector<uint8_t> m_uiImageValues;
   typedef struct image_buffor  //struktura do przechowywania danych
   {
     int             iWidth_;
@@ -22,10 +28,11 @@ private:
     int             itotal_;
     unsigned char* buf_;
   }image_buffor;
-  image_buffor buffor;
-  image_buffor editor;
+  image_buffor m_ibBuffor;
 public:
-  TInputImage(int width, int height, int amount_frame);
+  TInputImage(int iWidth, int iHeight, int iAmountFrame, string sFileName);
+  int GetCounter();
   void ReadVideo();
+  vector<uint8_t>* GetVectorImage();
 };
 
