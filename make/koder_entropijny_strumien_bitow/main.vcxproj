@@ -152,6 +152,7 @@
     <ClCompile Include="TOutputBitstream.cpp" />
     <ClCompile Include="TInputBitStream.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="UnitTestAns.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TAns.h" />

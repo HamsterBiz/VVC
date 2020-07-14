@@ -8,9 +8,9 @@ using namespace std;
 class TAns
 {
 public:
-  TAns(int iL, int ib);
+  TAns(int iL, int ib, int iXstate);
   void Code(int iP1, int s);
-  void Decode(int iP1);
+  int Decode(int iP1);
   void Test(int counter);
 private:
   int m_iL;//16
@@ -20,7 +20,7 @@ private:
   int m_iXq;
   int m_iXstate;
   vector<int> m_uiCodeValue; // vektor do zapisania stanu kodera
-  vector<uint8_t> m_uiTest1; // vektory do przechowywania zmiennych w celu przetestowania poprawnosci dzia³ania programu
-  vector<uint8_t> m_uiTest2;
+  //vector<uint8_t> m_uiTest1; // vektory do przechowywania zmiennych w celu przetestowania poprawnosci dzia³ania programu
+  //vector<uint8_t> m_uiTest2;
 };
 
