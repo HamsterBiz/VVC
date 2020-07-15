@@ -148,7 +148,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="TAns.cpp" />
-    <ClCompile Include="TInputImage.cpp" />
+    <ClCompile Include="TFileReader.cpp" />
+    <ClCompile Include="TImage.cpp" />
     <ClCompile Include="TOutputBitstream.cpp" />
     <ClCompile Include="TInputBitStream.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,7 +157,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TAns.h" />
-    <ClInclude Include="TInputImage.h" />
+    <ClInclude Include="TFileReader.h" />
+    <ClInclude Include="TImage.h" />
     <ClInclude Include="TOutputBitstream.h" />
     <ClInclude Include="TInputBitStream.h" />
   </ItemGroup>

@@ -14,7 +14,7 @@ Image::Image(int width, int height, int amount_frame)
 void Image::ReadVideo()
 {
   cerr << "1" << endl;
-  file_name_ = fopen("frame1_176x144.yuv", "rb");
+  file_name_ = fopen("foreman_176x144_qcif.yuv", "rb");
   file_name_edit_ = fopen("edycja_176x144.yuv", "rb");
   cerr << "1" << endl;
   buffor.buf_ = (unsigned char*)malloc(width_ * height_ * 1.5 * sizeof(unsigned  char));
@@ -42,7 +42,7 @@ void Image::ReadVideo()
        printf("Y: %d, u: %d, v: %d  ", y, u, v);
         cerr << endl;
         counter++;
-      //  cin.get();
+       //cin.get();
       }
 
     }
