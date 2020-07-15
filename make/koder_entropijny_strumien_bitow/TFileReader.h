@@ -16,8 +16,8 @@ private:
   int m_iHeight;
   string m_sFilename;
   int m_iCounter;
-  int OneAmount;
-  int ZeroAmount;
+  double OneAmount;
+  double ZeroAmount;
   typedef struct image_buffor  //struktura do przechowywania danych
   {
     int             iWidth_;
@@ -29,6 +29,7 @@ private:
 public:
   TFileReader(int iWidth, int iHeight, string sFileName);
   TImage* ReadFrame();
-  void PrintProbability();
+  double GetOneAmount();
+  double GetAll();
 };
 

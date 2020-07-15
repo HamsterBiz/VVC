@@ -19,15 +19,15 @@ int main()
   TestAns();  // Testowanie poprawności działania ANS (UnitTestAns.cpp)
   //-------------------------------------------------------------------
 
-  /*
+  
   TFileReader* pFileReader = new TFileReader(176, 144, "foreman_176x144_qcif.yuv");
   TImage* pImage = pFileReader->ReadFrame();
 
-  pFileReader->PrintProbability();
+  //pFileReader->PrintProbability();
 
   TAns* ans2 = new TAns(16, 2, 16);
   uint8_t uiPixelValue;
-  uint32_t uiP1 = 4;
+  int uiP1 = ((pFileReader->GetOneAmount() / pFileReader->GetAll()))*16;
   for (uint16_t y = 0; y < pImage->GetHeight(); y++)
     for (uint16_t x = 0; x < pImage->GetWidth(); x++)
     {
@@ -42,7 +42,7 @@ int main()
       }
     }
   TImage* pDecodeImage = new TImage(nullptr, pImage->GetWidth(), pImage->GetHeight());
- // iSizeAfterEncoding = ans2->GetBitAmout();
+  iSizeAfterEncoding = ans2->GetBitAmout();
   cerr << "Rozmiary: " << endl;
   cerr << "Przed kodowaniem: "<< iSizeBeforeEncoding <<endl;
   cerr << "Po kodowaniu: "<< iSizeAfterEncoding <<endl;
@@ -76,14 +76,11 @@ int main()
   cerr << int(pDecodeImage->GetValueAt(0, 1)) << endl;
   cerr << int(pDecodeImage->GetValueAt(0, 2)) << endl;
   cerr << int(pDecodeImage->GetValueAt(0, 3)) << endl;
-  cerr << int(pDecodeImage->GetValueAt(0, 4)) << endl;
-  cerr << int(pDecodeImage->GetValueAt(0, 5)) << endl;
-  cerr << int(pDecodeImage->GetValueAt(0, 6)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 172)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 173)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 174)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 175)) << endl;
-  */
+  
 }
 
 
