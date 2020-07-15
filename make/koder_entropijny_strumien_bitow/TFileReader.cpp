@@ -10,6 +10,7 @@ TFileReader::TFileReader(int iWidth, int iHeight, string sFileName)
 
 TImage* TFileReader::ReadFrame()
 { 
+  int temp;
   int iRows = m_iHeight + (m_iHeight / 2), iCols = m_iWidth;
   int counter = 0;
   int** piMatrix = new int* [iRows];
@@ -26,6 +27,16 @@ TImage* TFileReader::ReadFrame()
     { 
       for (uint16_t x = 0; x < m_iWidth; x++)
       {
+        //temp = m_ibBuffor.buf_[counter];
+       // for (int i = 0; i < 8; i++)
+       // {
+       //   if (temp % 2)
+         // {
+        //    OneAmount++;
+        //  }
+         // else ZeroAmount++;
+         // temp >>= 1;
+        //}
         piMatrix[y][x] = m_ibBuffor.buf_[counter];
         counter++;
       }
@@ -34,4 +45,10 @@ TImage* TFileReader::ReadFrame()
   free(m_ibBuffor.buf_);
   TImage* pImage = new TImage(piMatrix, m_iWidth, iRows);
   return pImage;
+}
+
+void TFileReader::PrintProbability()
+{
+  cerr << "OneAmount: " << OneAmount << endl;
+  cerr << "ZeroAmount: " << ZeroAmount << endl;
 }

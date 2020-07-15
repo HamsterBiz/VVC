@@ -5,19 +5,18 @@ static void TestAns()
   TAns* ans = new TAns(16, 2, 16);
   bool bCorrect = true;
   int temp = 0;
-  vector<uint8_t> m_uiTest1; // vektory do przechowywania zmiennych w celu przetestowania poprawnosci dzia³ania programu
+  vector<int> m_uiTest1; // vektory do przechowywania zmiennych w celu przetestowania poprawnosci dzia³ania programu
   vector<uint8_t> m_uiTest2;
   for (int i = 0; i < iAmountTest; i++)
   {
     m_uiTest1.push_back(rand() % 2 + 0);
   }
-  //int size = m_uiTest1.size() - 1;
+
   for (int i = 0; i < m_uiTest1.size(); i++)
   {
     ans->Code(4, m_uiTest1[i]);
-    //m_uiTest1.pop_back();
   }
-  cerr << "dekodowanie" << endl;
+
   for (int i = 0; i < m_uiTest1.size(); i++)
   {
     temp = ans->Decode(4);
