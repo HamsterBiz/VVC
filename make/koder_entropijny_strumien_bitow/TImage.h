@@ -6,11 +6,12 @@ using namespace std;
 #include <iostream>
 #include <vector>
 #pragma warning(disable : 4996)
-
+#define M_PI 3.142857 
 class TImage
 {
 private:
   int** m_piMatrix;
+  int** m_piMatrixDCT;
   int m_iWidth;
   int m_iHeight;
 public:
@@ -19,5 +20,7 @@ public:
   int GetWidth();
   uint8_t GetValueAt(int y, int x);
   void InsertValueAt(int y, int x, uint8_t value);
+  void DCT8x8();
+  void IDCT8x8();
 };
 

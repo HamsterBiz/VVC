@@ -81,6 +81,8 @@ int main()
   cerr << int(pDecodeImage->GetValueAt(215, 174)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 175)) << endl;
   
+  pImage->DCT8x8();
+  pImage->IDCT8x8();
 }
 
 
