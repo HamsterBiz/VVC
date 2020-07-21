@@ -12,6 +12,7 @@ class TImage
 private:
   int** m_piMatrix;
   int** m_piMatrixDCT;
+  int** m_piMatrixIDCT;
   int m_iWidth;
   int m_iHeight;
 public:
@@ -22,5 +23,7 @@ public:
   void InsertValueAt(int y, int x, uint8_t value);
   void DCT8x8();
   void IDCT8x8();
+  void DCTTEST();
+  void ZigZag4x4();
 };
 

@@ -61,6 +61,7 @@ int main()
      // cin.get();
       pDecodeImage->InsertValueAt(y, x, uiPixelValue);
     }
+  /*
   cerr << "code" << endl;
   cerr << int(pImage->GetValueAt(0, 0)) << endl;
   cerr << int(pImage->GetValueAt(0, 1)) << endl;
@@ -80,9 +81,12 @@ int main()
   cerr << int(pDecodeImage->GetValueAt(215, 173)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 174)) << endl;
   cerr << int(pDecodeImage->GetValueAt(215, 175)) << endl;
-  
+  */
   pImage->DCT8x8();
   pImage->IDCT8x8();
+  pImage->DCTTEST();
+  cerr << "zigZag" << endl;
+  pImage->ZigZag4x4();
 }
 
 
