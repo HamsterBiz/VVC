@@ -12,12 +12,16 @@ TAns::TAns(int iL, int ib, int iXstate)
 
 void TAns::Code(int iP1, int s)
 {
+ // cerr << "Kodowanie, Prawdopodobieñstwo: "<<iP1<<" bit "<<s << endl;
+  
       m_iUs = 0;
       if (s == 0) m_iUs = m_ib * (m_iL - iP1);
       else m_iUs = m_ib * iP1;
       while (m_iXstate >= m_iUs)
       {
+        //cerr << "sss" << endl;
         m_uiCodeValue.push_back(m_iXstate % m_ib);
+       // cin.get();
         m_iXstate = m_iXstate / m_ib;
       }
       if (s == 0) m_iXstate = floor(((m_iXstate + 1) * m_iL - 1) / (m_iL - iP1));
@@ -47,6 +51,29 @@ int TAns::Decode(int iP1)
 int TAns::GetBitAmout()
 {
   return m_uiCodeValue.size();
+}
+
+void TAns::Save()
+{
+  std::fstream file;
+  file.open("test3.bin", ios::in | ios::out | ios::binary);
+  uint8_t uiPixelValue = 0;
+  int counter = 0;
+  cerr << endl;
+  for (int i = 0; i < m_uiCodeValue.size(); i++)
+  {
+    uint8_t uiBit = m_uiCodeValue[i];
+    //cerr << m_uiCodeValue[i] << " ";
+    //cerr << int(uiBit) << endl;
+    uiPixelValue = (uiPixelValue << 1) | uiBit;
+    counter++;
+    if (counter > 7)
+    {
+      file.write(reinterpret_cast<char*>(&uiPixelValue), sizeof(uint8_t));
+    }
+
+  }
+  file.close();
 }
 
 

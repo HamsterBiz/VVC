@@ -12,6 +12,7 @@ public:
   void Code(int iP1, int s);
   int Decode(int iP1);
   int GetBitAmout();
+  void Save();
 private:
   int m_iL;//16
   int m_ib;

@@ -7,6 +7,11 @@ using namespace std;
 #include <vector>
 #pragma warning(disable : 4996)
 #define M_PI 3.142857 
+#include "stdint.h"
+#include <inttypes.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
 class TImage
 {
 private:
@@ -15,6 +20,9 @@ private:
   int** m_piMatrixIDCT;
   int m_iWidth;
   int m_iHeight;
+  vector<__int16> ZigZagVector;
+  __int16 temp;
+  vector<int> m_iProbability;
 public:
   TImage(int** piMatrix, int iWidth, int iHeight);
   int GetHeight();
@@ -25,5 +33,8 @@ public:
   void IDCT8x8();
   void DCTTEST();
   void ZigZag4x4();
+  __int16 GetValueZigZag();
+  unsigned GetSizeZigZag();
+  vector <int>* CalculateProbability(int L);
 };
 
