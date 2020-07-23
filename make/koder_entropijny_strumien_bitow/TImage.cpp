@@ -42,14 +42,6 @@ void TImage::InsertValueAt(int y, int x, uint8_t value)
 void TImage::DCT8x8()
 {
 
-  //for (int i = 0; i < 8; i++)
- // {
- //   for (int j = 0; j < 8; j++)
-  //  {
-   //    cerr << m_piMatrix[j][i]<<",";
- //   }
- // }
-
   if (m_piMatrixDCT == nullptr)
   {
     int iRows = m_iHeight, iCols = m_iWidth;
@@ -247,7 +239,6 @@ vector<int>* TImage::CalculateProbability(int L)
       }
       else iZero++;
     }
-    //cerr << "miejsce " << j << " jedynki: " << iOne << " Zera: " << iZero <<" prawdopodobieñstwo: "<< (iOne / iZero) * L<< endl;
     if (int(iOne / iZero * L) == 0)
     {
       m_iProbability.push_back(1);
@@ -266,5 +257,10 @@ vector<int>* TImage::CalculateProbability(int L)
 
   
   return &m_iProbability;
+}
+
+int** TImage::GetImageMatrix()
+{
+  return m_piMatrix;
 }
 
