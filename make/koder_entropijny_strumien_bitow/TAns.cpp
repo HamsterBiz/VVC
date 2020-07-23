@@ -19,7 +19,6 @@ void TAns::Code(int iP1, int s)
       else m_iUs = m_ib * iP1;
       while (m_iXstate >= m_iUs)
       {
-        //cerr << "sss" << endl;
         m_uiCodeValue.push_back(m_iXstate % m_ib);
        // cin.get();
         m_iXstate = m_iXstate / m_ib;

@@ -36,5 +36,7 @@ public:
   __int16 GetValueZigZag();
   unsigned GetSizeZigZag();
   vector <int>* CalculateProbability(int L);
+  int** GetImageMatrix();
+
 };
 

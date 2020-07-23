@@ -153,6 +153,7 @@
     <ClCompile Include="TOutputBitstream.cpp" />
     <ClCompile Include="TInputBitStream.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TPrediction.cpp" />
     <ClCompile Include="UnitTestAns.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="TImage.h" />
     <ClInclude Include="TOutputBitstream.h" />
     <ClInclude Include="TInputBitStream.h" />
+    <ClInclude Include="TPrediction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
