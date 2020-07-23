@@ -28,7 +28,7 @@ int main()
   pImage->ZigZag4x4();
   TPrediction* prediction = new TPrediction(pImage->GetImageMatrix(), pImage->GetWidth(), pImage->GetHeight(), 8);
 
-  prediction->PredictionLeftToRight();
+  prediction->PredicitionLeftCorner();
 
 
 
