@@ -9,6 +9,7 @@ using namespace std;
 #include "UnitTestAns.cpp"
 #include "TFileReader.h"
 #include "TPrediction.h"
+#include "TContextModeling.h"
 int main()
 {
   //srand(time(NULL));
@@ -27,10 +28,17 @@ int main()
   pImage->DCT8x8();
   pImage->ZigZag4x4();
   TPrediction* prediction = new TPrediction(pImage->GetImageMatrix(), pImage->GetWidth(), pImage->GetHeight(), 8);
-
+  vector<TContextModeling*> ProbabilityVector;
   prediction->PredicitionLeftCorner();
-
-
+  for (int i = 0; i < 16; i++)
+  {
+    ProbabilityVector.push_back(new TContextModeling(256));
+  }
+  for (int i = 0; i < 16; i++)
+  {
+    cerr << "Pętla" << endl;
+   cerr<< ProbabilityVector[i]->GetProbabilityOfOne();
+  }
 
 
 
@@ -53,6 +61,7 @@ int main()
   for (unsigned y = 0; y < SizeZigZag; y++)
     {
       uiPixelValue = pImage->GetValueZigZag();
+      cerr << uiPixelValue << " ";
       if (uiPixelValue<0)
       {
         uiPixelValue = abs(uiPixelValue);
@@ -63,26 +72,33 @@ int main()
       {
         iSizeBeforeEncoding++;
         uint8_t uiBit = uiPixelValue & 0x01;
-        //cerr << int(uiBit) << " " ;
-        //ans2->Code(Probability->at(i), uiBit);
-        ans2->Code(Probability->at(i), uiBit);
+        ProbabilityVector[i]->ChangeProbabilityCode(uiBit);
+        ans2->Code(ProbabilityVector[i]->GetProbabilityOfOne(), uiBit);
         uiPixelValue = uiPixelValue >> 1;
       }
       if (negative == true)
       {
-        ans2->Code(Probability->at(12), 1);
+        ans2->Code(ProbabilityVector[12]->GetProbabilityOfOne(), 1);
+        ProbabilityVector[12]->ChangeProbabilityCode(1);
         negative = false;
       }
-      else ans2->Code(Probability->at(12), 0);
+      else
+      {
+        ProbabilityVector[12]->ChangeProbabilityCode(0);
+        ans2->Code(ProbabilityVector[12]->GetProbabilityOfOne(), 0);
+      }
     }
   file.close();
   ans2->Save();
-  //cerr << "Zero: " << iZero << "One: " << iOne << endl;
   TImage* pDecodeImage = new TImage(nullptr, pImage->GetWidth(), pImage->GetHeight());
   iSizeAfterEncoding = ans2->GetBitAmout();
   cerr << "Rozmiary: " << endl;
   cerr << "Przed kodowaniem: "<< pFileReader->GetAll() <<endl;
   cerr << "Po kodowaniu: "<< iSizeAfterEncoding <<endl;
+  cerr << endl;
+  cerr << endl; cerr << endl;
+  cerr << endl;
+
   bool Negative = false;
   for (unsigned y = 0; y < SizeZigZag; y++)
     {
@@ -92,15 +108,16 @@ int main()
       {
         if (i == 0)
         {
-          if (0 != ans2->Decode(Probability->at(12-i)))
+          if (0 != ans2->Decode(ProbabilityVector[12-i]->GetProbabilityOfOne()))
           {
+            ProbabilityVector[12 - i]->ChangeProbabilityDecode(1);
             Negative = true;
           }
+          else  ProbabilityVector[12 - i]->ChangeProbabilityDecode(0);
         }
         else {
-          uint8_t uiBit = ans2->Decode(Probability->at(12-i));
-          //cerr << 11 - i << " ";
-          //cerr << int(uiBit) << " ";
+          uint8_t uiBit = ans2->Decode(ProbabilityVector[12-i]->GetProbabilityOfOne());
+          ProbabilityVector[12 - i]->ChangeProbabilityDecode(uiBit);
           uiPixelValue = (uiPixelValue << 1) | uiBit;
         }
       } 
@@ -109,8 +126,7 @@ int main()
         uiPixelValue = uiPixelValue*(-1);
         Negative = false;
       }
-     // cerr << uiPixelValue<<" ";
-
+      cerr << uiPixelValue<<" ";
     }
  
 }
