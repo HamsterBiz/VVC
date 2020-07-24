@@ -29,14 +29,15 @@ public:
   int GetWidth();
   uint8_t GetValueAt(int y, int x);
   void InsertValueAt(int y, int x, uint8_t value);
-  void DCT8x8();
+  void DCT8x8(int** Matrix);
   void IDCT8x8();
   void DCTTEST();
-  void ZigZag4x4();
+  void ZigZag4x4(int** Matrix);
   __int16 GetValueZigZag();
   unsigned GetSizeZigZag();
   vector <int>* CalculateProbability(int L);
   int** GetImageMatrix();
+  int** GetDCTMatrix();
 
 };
 

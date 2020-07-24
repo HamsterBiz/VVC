@@ -25,26 +25,168 @@ int main()
   
   TFileReader* pFileReader = new TFileReader(176, 144, "foreman_176x144_qcif.yuv");
   TImage* pImage = pFileReader->ReadFrame();
-  pImage->DCT8x8();
-  pImage->ZigZag4x4();
+  //
+  //pImage->ZigZag4x4();
   TPrediction* prediction = new TPrediction(pImage->GetImageMatrix(), pImage->GetWidth(), pImage->GetHeight(), 8);
-  vector<TContextModeling*> ProbabilityVector;
+  vector<TContextModeling*> ProbabilityVectorLeft;
+  vector<TContextModeling*> ProbabilityVectorTop;
+  vector<TContextModeling*> ProbabilityVectorCorner;
+  int** matrix;
+    int** Matrix2;
+    unsigned SizeZigZag;
+    int uiPixelValue;
+    bool negative = false;
+  for (int i = 0; i < 16; i++)
+  {
+    ProbabilityVectorLeft.push_back(new TContextModeling(256));
+    ProbabilityVectorTop.push_back(new TContextModeling(256));
+    ProbabilityVectorCorner.push_back(new TContextModeling(256));
+  }
+  TAns* ansLeft = new TAns(256, 2, 16);
+  TAns* ansTop = new TAns(256, 2, 16);
+  TAns* ansCorner = new TAns(256, 2, 16);
+  int XBlock = pImage->GetWidth()/8;
+  int YBlock = pImage->GetHeight()/8;
+  cerr << "ilosc bloków X: " << XBlock << " ilosc bloków Y:" << YBlock << endl;
+  for (int k = 0; k < YBlock; k++)
+  {
+    for (int l = 0; l < XBlock; l++)
+    {
+
   prediction->PredicitionLeftCorner();
-  for (int i = 0; i < 16; i++)
+  matrix = prediction->GetLeftCorner();
+  pImage->DCT8x8(matrix);
+  cerr << endl;
+  Matrix2 = pImage->GetDCTMatrix();
+  pImage->ZigZag4x4(Matrix2);
+ // pImage->IDCT8x8();
+  SizeZigZag = pImage->GetSizeZigZag();
+  for (unsigned y = 0; y < SizeZigZag; y++)
   {
-    ProbabilityVector.push_back(new TContextModeling(256));
+    uiPixelValue = pImage->GetValueZigZag();
+    cerr << uiPixelValue << " ";
+    if (uiPixelValue < 0)
+    {
+      uiPixelValue = abs(uiPixelValue);
+      negative = true;
+    }
+
+    for (uint32_t i = 0; i < 12; i++)
+    {
+      iSizeBeforeEncoding++;
+      uint8_t uiBit = uiPixelValue & 0x01;
+      ProbabilityVectorCorner[i]->ChangeProbabilityCode(uiBit);
+      ansCorner->Code(ProbabilityVectorCorner[i]->GetProbabilityOfOne(), uiBit);
+      uiPixelValue = uiPixelValue >> 1;
+    }
+    if (negative == true)
+    {
+      ansCorner->Code(ProbabilityVectorCorner[12]->GetProbabilityOfOne(), 1);
+      ProbabilityVectorCorner[12]->ChangeProbabilityCode(1);
+      negative = false;
+    }
+    else
+    {
+      ProbabilityVectorCorner[12]->ChangeProbabilityCode(0);
+      ansCorner->Code(ProbabilityVectorCorner[12]->GetProbabilityOfOne(), 0);
+    }
   }
-  for (int i = 0; i < 16; i++)
-  {
-    cerr << "Pętla" << endl;
-   cerr<< ProbabilityVector[i]->GetProbabilityOfOne();
-  }
+  cerr << "ilosc bitow"<<endl;
+  cerr << "corner: "<< ansCorner->GetBitAmout()<< endl;
 
 
+  prediction->PredictionLeftToRight();
+  matrix = prediction->GetLeftToRight();
+  pImage->DCT8x8(matrix);
+  cerr << endl;
+  Matrix2 = pImage->GetDCTMatrix();
+  pImage->ZigZag4x4(Matrix2);
+  //pImage->IDCT8x8();
+  SizeZigZag = pImage->GetSizeZigZag();
+  for (unsigned y = 0; y < SizeZigZag; y++)
+  {
+    uiPixelValue = pImage->GetValueZigZag();
+    cerr << uiPixelValue << " ";
+    if (uiPixelValue < 0)
+    {
+      uiPixelValue = abs(uiPixelValue);
+      negative = true;
+    }
+
+    for (uint32_t i = 0; i < 12; i++)
+    {
+      iSizeBeforeEncoding++;
+      uint8_t uiBit = uiPixelValue & 0x01;
+      ProbabilityVectorLeft[i]->ChangeProbabilityCode(uiBit);
+      ansLeft->Code(ProbabilityVectorLeft[i]->GetProbabilityOfOne(), uiBit);
+      uiPixelValue = uiPixelValue >> 1;
+    }
+    if (negative == true)
+    {
+      ansLeft->Code(ProbabilityVectorLeft[12]->GetProbabilityOfOne(), 1);
+      ProbabilityVectorLeft[12]->ChangeProbabilityCode(1);
+      negative = false;
+    }
+    else
+    {
+      ProbabilityVectorLeft[12]->ChangeProbabilityCode(0);
+      ansLeft->Code(ProbabilityVectorLeft[12]->GetProbabilityOfOne(), 0);
+    }
+  }
+  cerr << "ilosc bitow" << endl;
+  cerr << "left: " << ansLeft->GetBitAmout() << endl;
+
+
+  prediction->PredictionTopToBottom();
+  matrix = prediction->GetTopToBottom();
+  pImage->DCT8x8(matrix);
+  cerr << endl;
+  Matrix2 = pImage->GetDCTMatrix();
+  pImage->ZigZag4x4(Matrix2);
+  //pImage->IDCT8x8();
+  SizeZigZag = pImage->GetSizeZigZag();
+  for (unsigned y = 0; y < SizeZigZag; y++)
+  {
+    uiPixelValue = pImage->GetValueZigZag();
+    cerr << uiPixelValue << " ";
+    if (uiPixelValue < 0)
+    {
+      uiPixelValue = abs(uiPixelValue);
+      negative = true;
+    }
+
+    for (uint32_t i = 0; i < 12; i++)
+    {
+      iSizeBeforeEncoding++;
+      uint8_t uiBit = uiPixelValue & 0x01;
+      ProbabilityVectorTop[i]->ChangeProbabilityCode(uiBit);
+      ansTop->Code(ProbabilityVectorTop[i]->GetProbabilityOfOne(), uiBit);
+      uiPixelValue = uiPixelValue >> 1;
+    }
+    if (negative == true)
+    {
+      ansTop->Code(ProbabilityVectorTop[12]->GetProbabilityOfOne(), 1);
+      ProbabilityVectorTop[12]->ChangeProbabilityCode(1);
+      negative = false;
+    }
+    else
+    {
+      ProbabilityVectorTop[12]->ChangeProbabilityCode(0);
+      ansTop->Code(ProbabilityVectorTop[12]->GetProbabilityOfOne(), 0);
+    }
+  }
+  cerr << "ilosc bitow" << endl;
+  cerr << "top: " << ansTop->GetBitAmout() << endl;
+  prediction->IncrementWidth();
+    }
+    prediction->IncrementHeight();
+  }
+  /*
+  pImage->DCT8x8();
 
   unsigned SizeZigZag = pImage->GetSizeZigZag();
   cerr << "size Zigzag" << SizeZigZag << endl;
-  TAns* ans2 = new TAns(256, 2, 16);
+  
   vector<int>* Probability = pImage->CalculateProbability(256);
   cerr << "prawd" << endl;
   for (int i = 0; i < Probability->size(); i++)
@@ -128,7 +270,7 @@ int main()
       }
       cerr << uiPixelValue<<" ";
     }
- 
+ */
 }
 
 
