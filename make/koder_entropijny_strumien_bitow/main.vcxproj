@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="TAns.cpp" />
+    <ClCompile Include="TContextModeling.cpp" />
     <ClCompile Include="TFileReader.cpp" />
     <ClCompile Include="TImage.cpp" />
     <ClCompile Include="TOutputBitstream.cpp" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TAns.h" />
+    <ClInclude Include="TContextModeling.h" />
     <ClInclude Include="TFileReader.h" />
     <ClInclude Include="TImage.h" />
     <ClInclude Include="TOutputBitstream.h" />

@@ -17,6 +17,17 @@ TImage::TImage(int** piMatrix, int iWidth,int iHeight)
   m_iWidth= iWidth;
   m_iHeight= iHeight;
   m_piMatrixDCT = nullptr;
+
+  if (m_piMatrixDCT == nullptr)
+  {
+    int iRows = 8, iCols = 8;
+    int counter = 0;
+    m_piMatrixDCT = new int* [iRows];
+    for (int i = 0; i < iRows; ++i)
+    {
+      m_piMatrixDCT[i] = new int[iCols];
+    }
+  }
 }
 
 int TImage::GetHeight()
@@ -39,34 +50,16 @@ void TImage::InsertValueAt(int y, int x, uint8_t value)
   m_piMatrix[y][x] = value;
 }
 
-void TImage::DCT8x8()
+void TImage::DCT8x8(int** Matrix)
 {
 
-  if (m_piMatrixDCT == nullptr)
-  {
-    int iRows = m_iHeight, iCols = m_iWidth;
-    int counter = 0;
-    m_piMatrixDCT = new int * [iRows];
-    for (int i = 0; i < iRows; ++i)
-    {
-      m_piMatrixDCT[i] = new int[iCols];
-    }
-  }
   int maks = 0;
   int min = 0;
-  int iNumberOfBlockX = m_iWidth /8;
-  int iNumberOfBlockY = m_iHeight /8;
+
   int i, j, u, v;
   double s;
-  __int16 temp;
+  //__int16 temp;
 
-
-  
-  for (int y = 0; y < iNumberOfBlockY; y++)
-  {
-
-   for (int x = 0; x < iNumberOfBlockX; x++)
-    {
       for (i = 0; i < 8; i++)
       {
         for (j = 0; j < 8; j++)
@@ -77,22 +70,20 @@ void TImage::DCT8x8()
           {
             for (v = 0; v < 8; v++)
             {
-              s += m_piMatrix[u+(y*8)][v+(x*8)] * cos((2 * u + 1) * i * M_PI / 16) *
+              s += Matrix[u][v] * cos((2 * u + 1) * i * M_PI / 16) *
                 cos((2 * v + 1) * j * M_PI / 16) *((i == 0) ? 1 / sqrt(2) : 1) *((j == 0) ? 1 / sqrt(2) : 1);
             }
           }
-          m_piMatrixDCT[i + (y * 8)][j + (x * 8)] = s / 4;
-          temp = s / 4;
+          m_piMatrixDCT[i][j] = s / 4;
+          //temp = s / 4;
         }
       }
-    }
-  }
 }
 
 void TImage::IDCT8x8()
 {
   
-    int iRows = m_iHeight, iCols = m_iWidth;
+    int iRows = 8, iCols = 8;
     int counter = 0;
     m_piMatrixIDCT = new int* [iRows];
     for (int i = 0; i < iRows; ++i)
@@ -102,13 +93,7 @@ void TImage::IDCT8x8()
   
     int i, j, u, v;
   double s;
-  int iNumberOfBlockX = m_iWidth / 8;
-  int iNumberOfBlockY = m_iHeight / 8;
-  for (int y = 0; y < iNumberOfBlockY; y++)
-  {
 
-    for (int x = 0; x < iNumberOfBlockX; x++)
-    {
       for (i = 0; i < 8; i++)
       {
         for (j = 0; j < 8; j++)
@@ -119,17 +104,25 @@ void TImage::IDCT8x8()
           {
             for (v = 0; v < 8; v++)
             { 
-              s += m_piMatrixDCT[u + (y * 8)][v + (x * 8)] * cos((2 * i + 1) * u * M_PI / 16) *
+              s += m_piMatrixDCT[u][v ] * cos((2 * i + 1) * u * M_PI / 16) *
               cos((2 * j + 1) * v * M_PI / 16) *((u == 0) ? 1 / sqrt(2) : 1.) *((v == 0) ? 1 / sqrt(2) : 1.);
             }
             }
-          m_piMatrixIDCT[i + (y * 8)][j + (x * 8)] = int(s / 4);
+          m_piMatrixIDCT[i][j] = int(s / 4);
         }
       }
+    
+  
+
+  cerr << "IDCT: " << endl;
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      cerr << m_piMatrixIDCT[i][j] << " ";
     }
+    cerr << endl;
   }
-
-
 }
 
 void TImage::DCTTEST()
@@ -148,20 +141,11 @@ void TImage::DCTTEST()
   cerr << "maksymalna roznica wyników po DCT wynosi: " << maks << endl;
 }
 
-void TImage::ZigZag4x4()
+void TImage::ZigZag4x4(int** Matrix)
 {
-  cerr << "zigzag 4x4" << endl;
-  //for (int i = 0; i < 4; i++)
- // {
-  //  for (int j = 0; j < 4; j++)
- //   {
-  //    cerr<<m_piMatrixDCT[i][j] << " ";
-    
-  //  }
-  //  cerr << endl;
-  //}
-  int iNumberOfBlockX = m_iWidth / 4;
-  int iNumberOfBlockY = m_iHeight / 4;
+
+  int iNumberOfBlockX = 2;
+  int iNumberOfBlockY = 2;
   int n = 4;
   int m = 4;
   for (int yy = 0; yy < iNumberOfBlockY; yy++)
@@ -176,8 +160,8 @@ void TImage::ZigZag4x4()
           int y = (i < n) ? i : n - 1;
           while (x < n && y >= 0)
           {
-            //cerr << m_piMatrixDCT[x + (yy * 4)][y + (xx * 4)] << " ";
-            ZigZagVector.push_back(m_piMatrixDCT[x + (yy * 4)][y + (xx * 4)]);            
+            cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
+            ZigZagVector.push_back(Matrix[x + (yy * 4)][y + (xx * 4)]);
             //cerr << m_piMatrixDCT[x ][y ] << " ";
             //ZigZagVector.push_back(m_piMatrixDCT[x ][y]);
             x++; y--;
@@ -189,8 +173,8 @@ void TImage::ZigZag4x4()
           int y = i < n ? 0 : i - n + 1;
           while (x >= 0 && y < n)
           {
-           // cerr << m_piMatrixDCT[x + (yy * 4)][y + (xx * 4)] << " ";
-            ZigZagVector.push_back(m_piMatrixDCT[x + (yy * 4)][y + (xx * 4)]);
+            cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
+            ZigZagVector.push_back(Matrix[x + (yy * 4)][y + (xx * 4)]);
            // cerr << m_piMatrixDCT[x][y] << " ";
            // ZigZagVector.push_back(m_piMatrixDCT[x][y]);
             x--; y++;
@@ -203,11 +187,16 @@ void TImage::ZigZag4x4()
   }
 }
 
-__int16 TImage::GetValueZigZag()
+__int16 TImage::GetValueZigZag(int index)
 {
-  temp = ZigZagVector[0];
-  ZigZagVector.erase(ZigZagVector.begin());
+  temp = ZigZagVector[index];
+  //ZigZagVector.erase(ZigZagVector.begin());
   return temp;
+}
+
+void TImage::ClearVector()
+{
+  ZigZagVector.clear();
 }
 
 unsigned TImage::GetSizeZigZag()
@@ -262,5 +251,10 @@ vector<int>* TImage::CalculateProbability(int L)
 int** TImage::GetImageMatrix()
 {
   return m_piMatrix;
+}
+
+int** TImage::GetDCTMatrix()
+{
+  return m_piMatrixDCT;
 }
 

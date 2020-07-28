@@ -14,11 +14,19 @@ private:
   int** m_piLeftCorner;
   int m_iWidth;
   int m_iHeight;
+  int m_iActualWidth;
+  int m_iActualHeight;
   int m_iBlockSize;
 public:
   TPrediction(int** piImageMatrix, int iWidth, int iHeight, int iBlockSize);
   void PredictionLeftToRight();
   void PredictionTopToBottom();
   void PredicitionLeftCorner();
+  int** GetLeftToRight();
+  int** GetTopToBottom();
+  int** GetLeftCorner();
+  void IncrementHeight();
+  void IncrementWidth();
+
 };
 

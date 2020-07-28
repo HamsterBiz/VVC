@@ -18,7 +18,6 @@ TImage* TFileReader::ReadFrame()
   { 
     piMatrix[i] = new int[iCols];
   }
-  //vector<uint8_t> m_uiImageValues;
   m_pfFile = fopen(m_sFilename.c_str(), "rb");
   m_ibBuffor.buf_ = (unsigned char*)malloc(m_iWidth * m_iHeight * 1.5 * sizeof(unsigned  char));
   fread(m_ibBuffor.buf_, sizeof(unsigned char), (m_iWidth * m_iHeight) * 1.5, m_pfFile);
