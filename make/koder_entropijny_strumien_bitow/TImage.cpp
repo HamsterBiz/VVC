@@ -187,11 +187,16 @@ void TImage::ZigZag4x4(int** Matrix)
   }
 }
 
-__int16 TImage::GetValueZigZag()
+__int16 TImage::GetValueZigZag(int index)
 {
-  temp = ZigZagVector[0];
-  ZigZagVector.erase(ZigZagVector.begin());
+  temp = ZigZagVector[index];
+  //ZigZagVector.erase(ZigZagVector.begin());
   return temp;
+}
+
+void TImage::ClearVector()
+{
+  ZigZagVector.clear();
 }
 
 unsigned TImage::GetSizeZigZag()

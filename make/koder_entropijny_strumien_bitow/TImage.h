@@ -33,7 +33,8 @@ public:
   void IDCT8x8();
   void DCTTEST();
   void ZigZag4x4(int** Matrix);
-  __int16 GetValueZigZag();
+  __int16 GetValueZigZag(int index);
+  void ClearVector();
   unsigned GetSizeZigZag();
   vector <int>* CalculateProbability(int L);
   int** GetImageMatrix();

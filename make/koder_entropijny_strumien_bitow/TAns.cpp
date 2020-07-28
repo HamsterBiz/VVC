@@ -10,6 +10,17 @@ TAns::TAns(int iL, int ib, int iXstate)
   m_iXstate= iXstate;
 }
 
+TAns::TAns(int iL, int ib, int iXstate, vector<int> vector)
+{
+  m_iL = iL;
+  m_ib = ib;
+  m_iUs = 0;
+  m_iS = 0;
+  m_iXq = 0;
+  m_iXstate = iXstate;
+  m_uiCodeValue = vector;
+}
+
 void TAns::Code(int iP1, int s)
 {
  // cerr << "Kodowanie, Prawdopodobieñstwo: "<<iP1<<" bit "<<s << endl;
@@ -73,6 +84,26 @@ void TAns::Save()
 
   }
   file.close();
+}
+
+int TAns::GetL()
+{
+    return m_iL;
+}
+
+int TAns::GetB()
+{
+  return m_ib;
+}
+
+int TAns::GetXstate()
+{
+  return m_iXstate;
+}
+
+vector<int> TAns::GetVector()
+{
+  return m_uiCodeValue;
 }
 
 

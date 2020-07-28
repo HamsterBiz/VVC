@@ -9,10 +9,15 @@ class TAns
 {
 public:
   TAns(int iL, int ib, int iXstate);
+  TAns(int iL, int ib, int iXstate, vector<int> vector);
   void Code(int iP1, int s);
   int Decode(int iP1);
   int GetBitAmout();
   void Save();
+  int GetL();
+  int GetB();
+  int GetXstate();
+  vector<int> GetVector();
 private:
   int m_iL;//16
   int m_ib;
