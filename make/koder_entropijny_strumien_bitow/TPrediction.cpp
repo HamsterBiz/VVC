@@ -8,7 +8,10 @@ TPrediction::TPrediction(int** piImageMatrix, int iWidth, int iHeight, int iBloc
   m_iBlockSize= iBlockSize;
   m_iActualWidth=0;
   m_iActualHeight=0;
-  int iRows = iHeight, iCols = iWidth;
+  m_iMotionVectorX=0;
+  m_iMotionVectorY=0;
+  m_iMotionValue=0;
+ int iRows = iHeight, iCols = iWidth;
   int counter = 0;
   m_piPredictionMatrix = new int* [iRows];
   for (int i = 0; i < iRows; ++i)
@@ -31,6 +34,11 @@ TPrediction::TPrediction(int** piImageMatrix, int iWidth, int iHeight, int iBloc
   {
     m_piLeftCorner[i] = new int[iCols];
   }
+  m_piMotion = new int* [iRows];
+  for (int i = 0; i < iRows; ++i)
+  {
+    m_piMotion[i] = new int[iCols];
+  }
 }
 
 void TPrediction::PredictionLeftToRight()
@@ -44,27 +52,7 @@ void TPrediction::PredictionLeftToRight()
     {
       m_piLeftToRight[j][k] = m_piImageMatrix[j+ m_iActualHeight][k + m_iActualWidth] - m_piLeftToRight[j][0];
     }
- // m_piImageMatrix
-  /*
-  cerr << "Macie¿ ogrginalna: " << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piImageMatrix[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  cerr << "macie¿ predykcji" << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piLeftToRight[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  */
+
 }
 
 void TPrediction::PredictionTopToBottom()
@@ -78,27 +66,6 @@ void TPrediction::PredictionTopToBottom()
     {
       m_piTopToBottom[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piTopToBottom[0][j];
     }
-  // m_piImageMatrix
-  /*
-  cerr << "Macie¿ ogrginalna: " << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piImageMatrix[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  cerr << "macie¿ predykcji" << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piTopToBottom[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  */
 }
 
 void TPrediction::PredicitionLeftCorner()
@@ -138,27 +105,171 @@ void TPrediction::PredicitionLeftCorner()
     counter++;
   }
 
-   /*
-  cerr << "Macie¿ ogrginalna: " << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piImageMatrix[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  cerr << "macie¿ predykcji" << endl;
-  for (int i = 0; i < 8; i++)
-  {
-    for (int j = 0; j < 8; j++)
-    {
-      cerr << m_piLeftCorner[i][j] << " ";
-    }
-    cerr << endl;
-  }
-  */
+   
 }
+
+void TPrediction::PredictionMotion()
+{
+  if (m_iActualHeight == 0 && m_iActualWidth == 0) // pierwszy blok nie da siê zrobiæ predykci - wysy³amy oryginalny blok
+  {
+    for (int i = 0; i < m_iBlockSize; i++)
+    {
+      for (int j = 0; j < m_iBlockSize; j++)
+      {
+        m_piMotion[i][j] = m_piImageMatrix[i][j];
+      }
+    }
+    cerr << "predykcja ruchu blok 0" << endl;
+    cerr << "obraz orginalny: " << endl;
+    for (int i = 0; i < m_iBlockSize; i++)
+    {
+      for (int j = 0; j < m_iBlockSize; j++)
+      {
+        cerr << m_piImageMatrix[i][j] << " ";
+      }
+      cerr << endl;
+    }
+    cerr << "obraz zakodowany: " << endl;
+    for (int i = 0; i < m_iBlockSize; i++)
+    {
+      for (int j = 0; j < m_iBlockSize; j++)
+      {
+        cerr << m_piMotion[i][j] << " ";
+      }
+      cerr << endl;
+    }
+  }
+  else // mozna liczyc predykcje
+  {
+    //--------------------------------
+//------------------------------------------------
+    if (m_iActualWidth > 8) //wiecej niz dwa blok
+    {
+      if (m_iActualHeight > 8)
+      {// dzia³a!
+        cerr << "jestem w warunku to i to wieksze ni¿ 8 " << endl;
+        int counterX = m_iActualHeight - 7;
+        int lines = (22 * 8) - 7;
+        for(int l=0;l<m_iActualWidth/8+1;l++)
+        { 
+          if (l == m_iActualWidth / 8)
+          {
+            lines = m_iActualWidth - 7;
+          }
+          for (int i = 0; i < lines; i++)//22 bloki o rozmiarze 8
+          {
+
+            for (int k = 0; k < m_iBlockSize; k++)
+            {
+              for (int j = 0; j < m_iBlockSize; j++)
+              {
+                m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k+(l*8)][j + i];//ta druga siê przesuwa
+                //cerr << "wspol 1: " << k + (l * 8) << " wspol 2 : " << j + i << endl;
+                
+              }
+            }
+            //cin.get();
+          }
+        }
+      }
+      else//bierze pod uwage tylko przesuwanie w poziomie bo wysokosc jest rowna 0
+      { 
+      cerr << "Wysokosc rowna 0 wiecej niz 2 bloki" << endl;
+      int counterX = m_iActualWidth - 7;
+
+      for (int i = 0; i < counterX; i++)
+      {
+
+        for (int k = 0; k < m_iBlockSize; k++)
+        {
+          for (int j = 0; j < m_iBlockSize; j++)
+          {
+            m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k][j + i];//ta druga siê przesuwa
+          }
+        }
+        cerr << "counter: " << counterX << endl;
+        for (int i = 0; i < m_iBlockSize; i++)
+        {
+          for (int j = 0; j < m_iBlockSize; j++)
+          {
+            cerr << m_piMotion[i][j] << " ";
+          }
+          cerr << endl;
+        }
+      }
+    }
+    }
+    else //dwa bloki
+    {
+      if (m_iActualHeight >= 8)//przejdz caly rzad 
+      {
+        cerr << "rzad 2 bloki wysokosc wieksza ni¿ 1 lub rowna " << endl;
+        int counterX = m_iActualHeight - 7;
+        int lines = (22 * 8) - 7;
+        for (int l = 0; l < m_iActualWidth / 8 + 1; l++)
+        {
+          if (l == m_iActualWidth / 8)
+          {
+            lines = m_iActualWidth - 7;
+          }
+          for (int i = 0; i < lines; i++)//22 bloki o rozmiarze 8
+          {
+
+            for (int k = 0; k < m_iBlockSize; k++)
+            {
+              for (int j = 0; j < m_iBlockSize; j++)
+              {
+                m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (l * 8)][j + i];//ta druga siê przesuwa
+                cerr << "wspol 1: " << k + (l * 8) << " wspol 2 : " << j + i << endl;
+
+              }
+            }
+            //cin.get();
+          }
+        }
+      }
+      else
+      { 
+      cerr << "dwa bloki brak rzedu" << endl;
+      for (int k = 0; k < m_iBlockSize; k++)
+      {
+        for (int j = 0; j < m_iBlockSize; j++)
+        {
+          m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k][j];//ta druga siê przesuwa
+        }
+      }
+      cerr << "obraz zakodowany: " << endl;
+      for (int i = 0; i < m_iBlockSize; i++)
+      {
+        for (int j = 0; j < m_iBlockSize; j++)
+        {
+          cerr << m_piMotion[i][j] << " ";
+        }
+        cerr << endl;
+      }
+    }
+    }
+
+
+    cerr << "Macierz obrazu:" << endl;
+    for (int x = 0; x < 3; x++)
+    {
+      for (int i = 0; i < m_iBlockSize; i++)
+      {
+        for (int j = 0; j < m_iBlockSize; j++)
+        {
+          cerr << m_piImageMatrix[i][j + (8 * x)] << " ";
+        }
+        cerr << endl;
+      }
+      cerr << endl;
+    }
+
+  }
+}
+  
+
+
 
 int** TPrediction::GetLeftToRight()
 {
