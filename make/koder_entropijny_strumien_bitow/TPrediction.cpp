@@ -122,6 +122,7 @@ void TPrediction::PredictionMotion()
       for (int j = 0; j < m_iBlockSize; j++)
       {
         m_piMotion[i][j] = m_piImageMatrix[i][j];
+        //cerr << "1:" << m_piMotion[i][j] << endl;
         temp += abs(m_piImageMatrix[i][j]);
       }
     }
@@ -130,6 +131,7 @@ void TPrediction::PredictionMotion()
       m_iMotionValue = temp;
       tempX = 0;
       tempY = 0;
+      return;
     }
     //cerr << "predykcja ruchu blok 0" << endl;
     //cerr << "obraz orginalny: " << endl;
@@ -478,6 +480,16 @@ int** TPrediction::PredictionMotion(int x, int y)
       }
     }
   }
+  else if (x == 0 && y == 0)
+  {
+    for (int i = 0; i < m_iBlockSize; i++)
+    {
+      for (int j = 0; j < m_iBlockSize; j++)
+      {
+        m_piMotion[i][j] = m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth];
+      }
+    }
+  }
   else {
 
  
@@ -487,7 +499,7 @@ int** TPrediction::PredictionMotion(int x, int y)
     {
       //m_piMotion[i][j] = m_piImageMatrix[i][j];
       m_piMotion[i][j] = m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[i + x][j + y];
-     // cerr << "x" << i + x <<" "<< j + y << endl;
+      cerr << m_piMotion[i][j] << " ";
       temp += abs(m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[i + x][j + y]);
     }
   }
