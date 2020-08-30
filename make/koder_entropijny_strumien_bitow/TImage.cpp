@@ -160,7 +160,7 @@ void TImage::ZigZag4x4(int** Matrix)
           int y = (i < n) ? i : n - 1;
           while (x < n && y >= 0)
           {
-            cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
+           // cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
             ZigZagVector.push_back(Matrix[x + (yy * 4)][y + (xx * 4)]);
             //cerr << m_piMatrixDCT[x ][y ] << " ";
             //ZigZagVector.push_back(m_piMatrixDCT[x ][y]);
@@ -173,7 +173,7 @@ void TImage::ZigZag4x4(int** Matrix)
           int y = i < n ? 0 : i - n + 1;
           while (x >= 0 && y < n)
           {
-            cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
+            //cerr << Matrix[x + (yy * 4)][y + (xx * 4)] << " ";
             ZigZagVector.push_back(Matrix[x + (yy * 4)][y + (xx * 4)]);
            // cerr << m_piMatrixDCT[x][y] << " ";
            // ZigZagVector.push_back(m_piMatrixDCT[x][y]);
