@@ -31,6 +31,7 @@ int main()
   vector<TContextModeling*> ProbabilityVectorLeft;
   vector<TContextModeling*> ProbabilityVectorTop;
   vector<TContextModeling*> ProbabilityVectorCorner;
+  vector<TContextModeling*> ProbabilityVectorMotion;
   int** matrix;
   int** Matrix2;
   unsigned SizeZigZag;
@@ -38,13 +39,15 @@ int main()
   bool negative = false;
   int maks = 0;
   int min = 0;
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i < 17; i++)
   {
     ProbabilityVectorLeft.push_back(new TContextModeling(256));
     ProbabilityVectorTop.push_back(new TContextModeling(256));
     ProbabilityVectorCorner.push_back(new TContextModeling(256));
+    ProbabilityVectorMotion.push_back(new TContextModeling(256));
   }
   TAns* ansLeft = new TAns(256, 2, 16);
+  TAns* ansMotion = new TAns(256, 2, 16);
   TAns* ansTop = new TAns(256, 2, 16);
   TAns* ansCorner = new TAns(256, 2, 16);
   int XBlock = pImage->GetWidth() / 8;
@@ -54,24 +57,174 @@ int main()
   int iAmountDecodeValue = 0;
   int iAmountDecodeValueL = 0;
   int iAmountDecodeValueT = 0;
-  cerr << 0 / 8 << "dzielenie zera" << endl;
   cerr << "ilosc bloków X: " << XBlock << " ilosc bloków Y:" << YBlock << endl;
-  //prediction->IncrementHeight();
-  prediction->IncrementHeight();
-  prediction->IncrementWidth();
-  prediction->IncrementWidth();
-  prediction->PredictionMotion();
- // prediction->IncrementWidth();
- // prediction->PredictionMotion();
- // prediction->IncrementWidth();
- // prediction->PredictionMotion();
-  /* DZIALAJACE KODOWANIE I DEKODOWANIE
+  // prediction->IncrementHeight();
+  // prediction->IncrementHeight(); 
+  // prediction->IncrementHeight();
+   //prediction->IncrementWidth();
+  // prediction->IncrementWidth();
+  // prediction->PredictionMotion();
+  // cerr << prediction->GetMotionX() << " " << prediction->GetMotionY()<<" "<<prediction->GetMotionValue()<<"wyliczone: ";
+   //matrix = prediction->PredictionMotion(prediction->GetMotionX(), prediction->GetMotionY());
+  // prediction->IncrementWidth();
+  // prediction->PredictionMotion();
+  // prediction->IncrementWidth();
+  // prediction->PredictionMotion();
+   // DZIALAJACE KODOWANIE I DEKODOWANIE
   cerr << "ilosc bloków X: " << XBlock << " ilosc bloków Y:" << YBlock << endl;
   for (int k = 0; k < YBlock; k++)//Yblock
   {
     for (int l = 0; l < XBlock; l++)//Xblock
     {
+      //-----------------------------------------Predykcja ruchu
+      prediction->PredictionMotion();
+      matrix = prediction->PredictionMotion(prediction->GetMotionX(), prediction->GetMotionY());
+      pImage->DCT8x8(matrix);
+      // cerr << endl;
+      Matrix2 = pImage->GetDCTMatrix();
+      pImage->ZigZag4x4(Matrix2);
+      // pImage->IDCT8x8();
+      SizeZigZag = pImage->GetSizeZigZag();
+      //cerr << "ZigZagSize:" << pImage->GetSizeZigZag() << endl;
+      //cin.get();
+      cerr << "motion:" << endl;
+      for (unsigned y = 0; y < SizeZigZag; y++)
+      {
+        if (y == 0)// pierwszy symbol > 0
+        {
+          uiPixelValue = pImage->GetValueZigZag(y);
+          uiPixelValue /= iQuantizationFactor;
+          cerr << uiPixelValue << " ";
+        //  cerr << uiPixelValue << " ";
+          if (maks < uiPixelValue) maks = uiPixelValue;
+          if (min > uiPixelValue) min = uiPixelValue;
+          if (uiPixelValue < 0)
+          {
+            uiPixelValue = abs(uiPixelValue);
+            negative = true;
+          }
 
+          for (uint32_t i = 0; i < 12; i++)
+          {
+            uint8_t uiBit = uiPixelValue & 0x01;
+            ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+            ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+            uiPixelValue = uiPixelValue >> 1;
+          }
+          if (negative == true)
+          {
+            ProbabilityVectorMotion[12]->ChangeProbabilityCode(1);
+            ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 1);
+
+            negative = false;
+          }
+          else
+          {
+            ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+            ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+          }
+        }
+        else //sprawdzanie kolejnych symboli
+        {
+          uiPixelValue = pImage->GetValueZigZag(y);
+          uiPixelValue /= iQuantizationFactor;
+          cerr << uiPixelValue << " ";
+          if (uiPixelValue == 0)
+          {
+            iZeroAmount++;
+          }
+          else
+          {
+            for (uint32_t i = 0; i < 12; i++)//kodowanie liczby zer
+            {
+              uint8_t uiBit = iZeroAmount & 0x01;
+              ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+              ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+              iZeroAmount = iZeroAmount >> 1;
+            }
+            ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+            ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+            iZeroAmount = 0;
+            if (uiPixelValue < 0)
+            {
+              uiPixelValue = abs(uiPixelValue);
+              negative = true;
+            }
+            for (uint32_t i = 0; i < 12; i++)//kodowanie kolejnej wartosci po 0
+            {
+              uint8_t uiBit = uiPixelValue & 0x01;
+              ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+              ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+              uiPixelValue = uiPixelValue >> 1;
+            }
+            if (negative == true)
+            {
+              ProbabilityVectorMotion[12]->ChangeProbabilityCode(1);
+              ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 1);
+
+              negative = false;
+            }
+            else
+            {
+              ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+              ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+            }
+          }
+        }
+      }
+
+      //}
+
+      if (iZeroAmount > 0)
+      {
+        for (uint32_t i = 0; i < 12; i++)//kodowanie liczby zer
+        {
+          uint8_t uiBit = iZeroAmount & 0x01;
+          ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+          ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+          iZeroAmount = iZeroAmount >> 1;
+        }
+        ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+        ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+
+
+      }
+      iZeroAmount = 0;
+      uint8_t uiBit = prediction->GetMotionX();
+      for (uint32_t i = 0; i < 12; i++)//kodowanie kolejnej wartosci po 0
+      {
+        uiBit = uiPixelValue & 0x01;
+        ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+        ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+        uiPixelValue = uiPixelValue >> 1;
+      }
+      ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+      ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+
+      uiBit = prediction->GetMotionY();
+      for (uint32_t i = 0; i < 12; i++)//kodowanie kolejnej wartosci po 0
+      {
+        uiBit = uiPixelValue & 0x01;
+        ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
+        ansMotion->Code(ProbabilityVectorMotion[i]->GetProbabilityOfOne(), uiBit);
+        uiPixelValue = uiPixelValue >> 1;
+      }
+      ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
+      ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
+
+
+      cerr << endl;
+      pImage->ClearVector();
+      ProbabilityVectorMotion[13]->ChangeProbabilityCode(0);
+      ansMotion->Code(ProbabilityVectorMotion[13]->GetProbabilityOfOne(), 0);
+      ProbabilityVectorMotion[14]->ChangeProbabilityCode(0);
+      ansMotion->Code(ProbabilityVectorMotion[14]->GetProbabilityOfOne(), 0);
+      ProbabilityVectorMotion[15]->ChangeProbabilityCode(1);
+      ansMotion->Code(ProbabilityVectorMotion[15]->GetProbabilityOfOne(), 1);
+      // cerr << "ilosc bitow"<<endl;
+      cerr << "corner: " << ansMotion->GetBitAmout() << endl;
+      //------------------------------------------preykcja ruchu
+      //-----------------------------------------LEWY NAROZNIK
       prediction->PredicitionLeftCorner();
       matrix = prediction->GetLeftCorner();
       pImage->DCT8x8(matrix);
@@ -188,12 +341,14 @@ int main()
       pImage->ClearVector();
       ProbabilityVectorCorner[13]->ChangeProbabilityCode(0);
       ansCorner->Code(ProbabilityVectorCorner[13]->GetProbabilityOfOne(), 0);
-      ProbabilityVectorCorner[14]->ChangeProbabilityCode(0);
-      ansCorner->Code(ProbabilityVectorCorner[14]->GetProbabilityOfOne(), 0);
+      ProbabilityVectorCorner[14]->ChangeProbabilityCode(1);
+      ansCorner->Code(ProbabilityVectorCorner[14]->GetProbabilityOfOne(), 1);
+      ProbabilityVectorCorner[15]->ChangeProbabilityCode(0);
+      ansCorner->Code(ProbabilityVectorCorner[15]->GetProbabilityOfOne(), 0);
       // cerr << "ilosc bitow"<<endl;
       cerr << "corner: " << ansCorner->GetBitAmout() << endl;
-
-
+      //-----------------------------------------LEWY NAROZNIK
+            //-----------------------------------------LEWO DO PRAWO
       prediction->PredictionLeftToRight();
       matrix = prediction->GetLeftToRight();
       pImage->DCT8x8(matrix);
@@ -310,10 +465,12 @@ int main()
       ansLeft->Code(ProbabilityVectorLeft[13]->GetProbabilityOfOne(), 1);
       ProbabilityVectorLeft[14]->ChangeProbabilityCode(0);
       ansLeft->Code(ProbabilityVectorLeft[14]->GetProbabilityOfOne(), 0);
+      ProbabilityVectorLeft[15]->ChangeProbabilityCode(0);
+      ansLeft->Code(ProbabilityVectorLeft[15]->GetProbabilityOfOne(), 0);
       // cerr << "ilosc bitow" << endl;
       cerr << "left: " << ansLeft->GetBitAmout() << endl;
-
-
+      //-----------------------------------------LEWO DO PRAWO
+      //-----------------------------------------GORA DOL
       prediction->PredictionTopToBottom();
       matrix = prediction->GetTopToBottom();
       pImage->DCT8x8(matrix);
@@ -429,20 +586,44 @@ int main()
       ansTop->Code(ProbabilityVectorTop[13]->GetProbabilityOfOne(), 1);
       ProbabilityVectorTop[14]->ChangeProbabilityCode(1);
       ansTop->Code(ProbabilityVectorTop[14]->GetProbabilityOfOne(), 1);
+      ProbabilityVectorTop[15]->ChangeProbabilityCode(0);
+      ansTop->Code(ProbabilityVectorTop[15]->GetProbabilityOfOne(), 0);
       //cerr << "ilosc bitow" << endl;
       cerr << "top: " << ansTop->GetBitAmout() << endl;
 
-
-
-      if (ansTop->GetBitAmout() < ansLeft->GetBitAmout())
+      //-----------------------------------------GORA DOL
+      if (ansMotion->GetBitAmout() < ansLeft->GetBitAmout() && ansMotion->GetBitAmout() < ansTop->GetBitAmout() && ansMotion->GetBitAmout() < ansCorner->GetBitAmout())
+      {
+        cerr << "motion" << endl;
+        delete ansTop;
+        delete ansCorner;
+        delete ansLeft;
+        ansLeft = new TAns(ansMotion->GetL(), ansMotion->GetB(), ansMotion->GetXstate(), ansMotion->GetVector());
+        ansTop = new TAns(ansMotion->GetL(), ansMotion->GetB(), ansMotion->GetXstate(), ansMotion->GetVector());
+        ansCorner = new TAns(ansMotion->GetL(), ansMotion->GetB(), ansMotion->GetXstate(), ansMotion->GetVector());
+        for (int i = 0; i < 16; i++)
+        {
+          ProbabilityVectorCorner[i]->SetOne(ProbabilityVectorMotion[i]->GetOne());
+          ProbabilityVectorCorner[i]->SetZero(ProbabilityVectorMotion[i]->GetZero());
+          ProbabilityVectorCorner[i]->SetProbabilityOfOne(ProbabilityVectorMotion[i]->GetProbabilityOfOne());
+          ProbabilityVectorTop[i]->SetOne(ProbabilityVectorMotion[i]->GetOne());
+          ProbabilityVectorTop[i]->SetZero(ProbabilityVectorMotion[i]->GetZero());
+          ProbabilityVectorTop[i]->SetProbabilityOfOne(ProbabilityVectorMotion[i]->GetProbabilityOfOne());
+          ProbabilityVectorLeft[i]->SetOne(ProbabilityVectorMotion[i]->GetOne());
+          ProbabilityVectorLeft[i]->SetZero(ProbabilityVectorMotion[i]->GetZero());
+          ProbabilityVectorLeft[i]->SetProbabilityOfOne(ProbabilityVectorMotion[i]->GetProbabilityOfOne());
+        }
+      }
+      else if (ansTop->GetBitAmout() < ansLeft->GetBitAmout())
       {
         if (ansCorner->GetBitAmout() < ansTop->GetBitAmout())
         {//corner najmniej bitów
           cerr << "corner" << endl;
-          iAmountDecodeValueL = iAmountDecodeValue;
-          iAmountDecodeValueT = iAmountDecodeValue;
+          delete ansMotion;
           delete ansLeft;
           delete ansTop;
+
+          ansMotion = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           ansLeft = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           ansTop = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           for (int i = 0; i < 16; i++)
@@ -453,6 +634,9 @@ int main()
             ProbabilityVectorTop[i]->SetOne(ProbabilityVectorCorner[i]->GetOne());
             ProbabilityVectorTop[i]->SetZero(ProbabilityVectorCorner[i]->GetZero());
             ProbabilityVectorTop[i]->SetProbabilityOfOne(ProbabilityVectorCorner[i]->GetProbabilityOfOne());
+            ProbabilityVectorMotion[i]->SetOne(ProbabilityVectorCorner[i]->GetOne());
+            ProbabilityVectorMotion[i]->SetZero(ProbabilityVectorCorner[i]->GetZero());
+            ProbabilityVectorMotion[i]->SetProbabilityOfOne(ProbabilityVectorCorner[i]->GetProbabilityOfOne());
           }
           // TAns* ansCorner = new TAns(256, 2, 16);
         }
@@ -461,6 +645,8 @@ int main()
           cerr << "top" << endl;
           delete ansLeft;
           delete ansCorner;
+          delete ansMotion;
+          ansMotion = new TAns(ansTop->GetL(), ansTop->GetB(), ansTop->GetXstate(), ansTop->GetVector());
           ansLeft = new TAns(ansTop->GetL(), ansTop->GetB(), ansTop->GetXstate(), ansTop->GetVector());
           ansCorner = new TAns(ansTop->GetL(), ansTop->GetB(), ansTop->GetXstate(), ansTop->GetVector());
           for (int i = 0; i < 16; i++)
@@ -471,6 +657,9 @@ int main()
             ProbabilityVectorCorner[i]->SetOne(ProbabilityVectorTop[i]->GetOne());
             ProbabilityVectorCorner[i]->SetZero(ProbabilityVectorTop[i]->GetZero());
             ProbabilityVectorCorner[i]->SetProbabilityOfOne(ProbabilityVectorTop[i]->GetProbabilityOfOne());
+            ProbabilityVectorMotion[i]->SetOne(ProbabilityVectorTop[i]->GetOne());
+            ProbabilityVectorMotion[i]->SetZero(ProbabilityVectorTop[i]->GetZero());
+            ProbabilityVectorMotion[i]->SetProbabilityOfOne(ProbabilityVectorTop[i]->GetProbabilityOfOne());
           }
         }
       }
@@ -481,6 +670,8 @@ int main()
           cerr << "corner" << endl;
           delete ansLeft;
           delete ansTop;
+          delete ansMotion;
+          ansMotion = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           ansTop = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           ansLeft = new TAns(ansCorner->GetL(), ansCorner->GetB(), ansCorner->GetXstate(), ansCorner->GetVector());
           for (int i = 0; i < 16; i++)
@@ -491,6 +682,9 @@ int main()
             ProbabilityVectorTop[i]->SetOne(ProbabilityVectorCorner[i]->GetOne());
             ProbabilityVectorTop[i]->SetZero(ProbabilityVectorCorner[i]->GetZero());
             ProbabilityVectorTop[i]->SetProbabilityOfOne(ProbabilityVectorCorner[i]->GetProbabilityOfOne());
+            ProbabilityVectorMotion[i]->SetOne(ProbabilityVectorCorner[i]->GetOne());
+            ProbabilityVectorMotion[i]->SetZero(ProbabilityVectorCorner[i]->GetZero());
+            ProbabilityVectorMotion[i]->SetProbabilityOfOne(ProbabilityVectorCorner[i]->GetProbabilityOfOne());
           }
         }
         else//left najmniej bitów
@@ -500,6 +694,8 @@ int main()
           iAmountDecodeValueT = iAmountDecodeValueL;
           delete ansTop;
           delete ansCorner;
+          delete ansMotion;
+          ansMotion = new TAns(ansLeft->GetL(), ansLeft->GetB(), ansLeft->GetXstate(), ansLeft->GetVector());
           ansTop = new TAns(ansLeft->GetL(), ansLeft->GetB(), ansLeft->GetXstate(), ansLeft->GetVector());
           ansCorner = new TAns(ansLeft->GetL(), ansLeft->GetB(), ansLeft->GetXstate(), ansLeft->GetVector());
           for (int i = 0; i < 16; i++)
@@ -510,6 +706,9 @@ int main()
             ProbabilityVectorTop[i]->SetOne(ProbabilityVectorLeft[i]->GetOne());
             ProbabilityVectorTop[i]->SetZero(ProbabilityVectorLeft[i]->GetZero());
             ProbabilityVectorTop[i]->SetProbabilityOfOne(ProbabilityVectorLeft[i]->GetProbabilityOfOne());
+            ProbabilityVectorMotion[i]->SetOne(ProbabilityVectorCorner[i]->GetOne());
+            ProbabilityVectorMotion[i]->SetZero(ProbabilityVectorCorner[i]->GetZero());
+            ProbabilityVectorMotion[i]->SetProbabilityOfOne(ProbabilityVectorCorner[i]->GetProbabilityOfOne());
           }
         }
 
@@ -562,64 +761,102 @@ int main()
   bool Negative = false;
   int temppp;
   int zeros = 0;
+  bool motion = false;
   for (unsigned y = 0; y < 600; y++)
   {
+    temppp = ansTop->Decode(ProbabilityVectorTop[15]->GetProbabilityOfOne());
+    cerr << temppp;
+    ProbabilityVectorTop[15]->ChangeProbabilityDecode(temppp);
+    if (temppp == 1)motion = true;
     temppp = ansTop->Decode(ProbabilityVectorTop[14]->GetProbabilityOfOne());
     cerr << temppp;
     ProbabilityVectorTop[14]->ChangeProbabilityDecode(temppp);
     temppp = ansTop->Decode(ProbabilityVectorTop[13]->GetProbabilityOfOne());
     cerr << temppp << " ";
     ProbabilityVectorTop[13]->ChangeProbabilityDecode(temppp);
-    for (int k = 0; k < 64; k++)
+    if (motion == true)
     {
-      uiPixelValue = 0;
-      for (uint32_t i = 0; i < 13; i++)
+      for (int k = 0; k < 2; k++)
       {
-        // cerr << "w";
-        if (i == 0)
+        uiPixelValue = 0;
+        for (uint32_t i = 0; i < 13; i++)
         {
-          if (0 != ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne()))
+          // cerr << "w";
+          if (i == 0)
           {
-            ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(1);
-            Negative = true;
+            if (0 != ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne()))
+            {
+              ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(1);
+              Negative = true;
+            }
+            else  ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(0);
           }
-          else  ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(0);
-        }
-        else {
+          else {
 
-          uint8_t uiBit = ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne());
-          ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(uiBit);
-          uiPixelValue = (uiPixelValue << 1) | uiBit;
+            uint8_t uiBit = ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne());
+            ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(uiBit);
+            uiPixelValue = (uiPixelValue << 1) | uiBit;
+          }
         }
-      }
-      cerr << " ";
-      if (Negative == true)
-      {
-        uiPixelValue = uiPixelValue * (-1);
-        Negative = false;
-      }
-
-      zeros++;
-      if (zeros % 2 != 0)
-      {
-        if (uiPixelValue == 0)
+        cerr << " ";
+        if (Negative == true)
         {
-          k--;
+          uiPixelValue = uiPixelValue * (-1);
+          Negative = false;
         }
-        else
-        {
-          k += uiPixelValue - 1;
-          cerr << "z" << uiPixelValue << " ";
-        }
+        cerr << "w" << uiPixelValue << " ";
       }
-      else cerr << uiPixelValue << " ";
+      for (int k = 0; k < 64; k++)
+      {
+        uiPixelValue = 0;
+        for (uint32_t i = 0; i < 13; i++)
+        {
+          // cerr << "w";
+          if (i == 0)
+          {
+            if (0 != ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne()))
+            {
+              ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(1);
+              Negative = true;
+            }
+            else  ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(0);
+          }
+          else {
 
+            uint8_t uiBit = ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne());
+            ProbabilityVectorTop[12 - i]->ChangeProbabilityDecode(uiBit);
+            uiPixelValue = (uiPixelValue << 1) | uiBit;
+          }
+        }
+        cerr << " ";
+        if (Negative == true)
+        {
+          uiPixelValue = uiPixelValue * (-1);
+          Negative = false;
+        }
+
+        zeros++;
+        if (zeros % 2 != 0)
+        {
+          if (uiPixelValue == 0)
+          {
+            k--;
+          }
+          else
+          {
+            k += uiPixelValue - 1;
+            cerr << "z" << uiPixelValue << " ";
+          }
+        }
+        else cerr << uiPixelValue << " ";
+
+      }
+      zeros = 0;
+      cerr << endl;
+      //cin.get();
     }
-    zeros = 0;
-    cerr << endl;
-    //cin.get();
+
   }
-  */
 }
 
 

@@ -110,6 +110,11 @@ void TPrediction::PredicitionLeftCorner()
 
 void TPrediction::PredictionMotion()
 {
+  m_iMotionValue = INT_MAX;
+  int temp = 0;
+  int tempX ;
+  int tempY ;
+  bool warunek = false;
   if (m_iActualHeight == 0 && m_iActualWidth == 0) // pierwszy blok nie da siê zrobiæ predykci - wysy³amy oryginalny blok
   {
     for (int i = 0; i < m_iBlockSize; i++)
@@ -117,26 +122,33 @@ void TPrediction::PredictionMotion()
       for (int j = 0; j < m_iBlockSize; j++)
       {
         m_piMotion[i][j] = m_piImageMatrix[i][j];
+        temp += abs(m_piImageMatrix[i][j]);
       }
     }
-    cerr << "predykcja ruchu blok 0" << endl;
-    cerr << "obraz orginalny: " << endl;
+    if (m_iMotionValue > temp)
+    {
+      m_iMotionValue = temp;
+      tempX = 0;
+      tempY = 0;
+    }
+    //cerr << "predykcja ruchu blok 0" << endl;
+    //cerr << "obraz orginalny: " << endl;
     for (int i = 0; i < m_iBlockSize; i++)
     {
       for (int j = 0; j < m_iBlockSize; j++)
       {
-        cerr << m_piImageMatrix[i][j] << " ";
+        //cerr << m_piImageMatrix[i][j] << " ";
       }
-      cerr << endl;
+      //cerr << endl;
     }
-    cerr << "obraz zakodowany: " << endl;
+    //cerr << "obraz zakodowany: " << endl;
     for (int i = 0; i < m_iBlockSize; i++)
     {
       for (int j = 0; j < m_iBlockSize; j++)
       {
-        cerr << m_piMotion[i][j] << " ";
+       // cerr << m_piMotion[i][j] << " ";
       }
-      cerr << endl;
+     // cerr << endl;
     }
   }
   else // mozna liczyc predykcje
@@ -145,9 +157,9 @@ void TPrediction::PredictionMotion()
 //------------------------------------------------
     if (m_iActualWidth > 8) //wiecej niz dwa blok
     {
-      if (m_iActualHeight > 8)
+      if (m_iActualHeight >= 8)
       {// dzia³a!
-        cerr << "jestem w warunku to i to wieksze ni¿ 8 " << endl;
+        //cerr << "jestem w warunku to i to wieksze ni¿ 8 " << endl;
         int counterX = m_iActualHeight - 7;
         int lines = (22 * 8) - 7;
         for(int l=0;l<m_iActualWidth/8+1;l++)
@@ -165,16 +177,32 @@ void TPrediction::PredictionMotion()
               {
                 m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k+(l*8)][j + i];//ta druga siê przesuwa
                 //cerr << "wspol 1: " << k + (l * 8) << " wspol 2 : " << j + i << endl;
-                
+                temp += abs(m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (l * 8)][j + i]);
+                if (warunek == false)
+                {
+                  warunek = true;
+                  tempX = k + (l * 8);
+                  tempY = j + i;
+                }
+           
               }
             }
-            //cin.get();
+          //  cerr << "p:" << temp << " ";
+            warunek = false;
+            if (m_iMotionValue > temp)
+            {
+              m_iMotionValue = temp;
+              m_iMotionVectorX = tempX;
+              m_iMotionVectorY = tempY;
+             // cerr << "w:" << m_iMotionVectorX << " " << m_iMotionVectorY << " ";
+            }
+            temp = 0;
           }
         }
       }
       else//bierze pod uwage tylko przesuwanie w poziomie bo wysokosc jest rowna 0
       { 
-      cerr << "Wysokosc rowna 0 wiecej niz 2 bloki" << endl;
+      //cerr << "Wysokosc rowna 0 wiecej niz 2 bloki" << endl;
       int counterX = m_iActualWidth - 7;
 
       for (int i = 0; i < counterX; i++)
@@ -185,52 +213,173 @@ void TPrediction::PredictionMotion()
           for (int j = 0; j < m_iBlockSize; j++)
           {
             m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k][j + i];//ta druga siê przesuwa
+            //cerr << "wspol 1: " << k << " wspol 2 : " << j + i << endl;
+            temp += abs(m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k][j + i]);
+            if (warunek == false)
+            {
+              warunek = true;
+              tempX = k;
+              tempY = j + i;
+            }
           }
         }
-        cerr << "counter: " << counterX << endl;
+        //cerr << "p:" << temp << " ";
+        warunek = false;
+        if (m_iMotionValue > temp)
+        {
+          m_iMotionValue = temp;
+          m_iMotionVectorX = tempX;
+          m_iMotionVectorY = tempY;
+         // cerr << "w:" << m_iMotionVectorX << " " << m_iMotionVectorY << " ";
+        }
+        temp = 0;
+        //cerr << "counter: " << counterX << endl;
         for (int i = 0; i < m_iBlockSize; i++)
         {
           for (int j = 0; j < m_iBlockSize; j++)
           {
-            cerr << m_piMotion[i][j] << " ";
+          //  cerr << m_piMotion[i][j] << " ";
           }
-          cerr << endl;
+          //cerr << endl;
         }
       }
     }
     }
-    else //dwa bloki
+    else //jeden lub dwa bloki w poziomie
     {
-      if (m_iActualHeight >= 8)//przejdz caly rzad 
+      if (m_iActualHeight >= 8)//przejdz caly rzad bo pion =1 lub wiêcej
       {
-        cerr << "rzad 2 bloki wysokosc wieksza ni¿ 1 lub rowna " << endl;
-        int counterX = m_iActualHeight - 7;
-        int lines = (22 * 8) - 7;
-        for (int l = 0; l < m_iActualWidth / 8 + 1; l++)
-        {
-          if (l == m_iActualWidth / 8)
-          {
+     //   cerr << "rzad 2 bloki wysokosc wieksza ni¿ 1 lub rowna " << endl;
+        //cerr << m_iActualWidth << " " << (m_iActualWidth / 8)+1 << endl;
+        int counterX = (m_iActualWidth / 8)
+          ;
+        int lines = 1;
+      //  for (int l = 0; l < counterX; l++)
+      //  {
+        //  cerr<<"weszlo" <<endl;
+        //  if (l == m_iActualWidth / 8)
+         // {
+            //cerr<<"warunek" <<endl;
             lines = m_iActualWidth - 7;
-          }
-          for (int i = 0; i < lines; i++)//22 bloki o rozmiarze 8
+        //  }
+          if (lines < 0)
           {
-
-            for (int k = 0; k < m_iBlockSize; k++)
+            for(int g=0;g<m_iActualHeight/8;g++)
             {
-              for (int j = 0; j < m_iBlockSize; j++)
-              {
-                m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (l * 8)][j + i];//ta druga siê przesuwa
-                cerr << "wspol 1: " << k + (l * 8) << " wspol 2 : " << j + i << endl;
+           //   cerr << "g: " << g << endl;
+           //   cin.get();
+            for (int i = 0; i < (22 * 8) - 7; i++)//22 bloki o rozmiarze 8
+            {
 
+              for (int k = 0; k < m_iBlockSize; k++)
+              {
+                for (int j = 0; j < m_iBlockSize; j++)
+                {
+                  m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k+(g*8)][j + i];//ta druga siê przesuwa
+                 // cerr << "wspol 1: " << k + (g * 8) << " wspol 2 : " << j + i << endl;
+                  temp += abs(m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (g * 8)][j + i]);
+                  if (warunek == false)
+                  {
+                    warunek = true;
+                    tempX = k + (g * 8);
+                    tempY = j + i;
+                  }
+                }
+              }
+           //   cerr << "p:" << temp << " ";
+              warunek = false;
+              if (m_iMotionValue > temp)
+              {
+                m_iMotionValue = temp;
+                m_iMotionVectorX = tempX;
+                m_iMotionVectorY = tempY;
+            //    cerr << "w:" << m_iMotionVectorX << " " << m_iMotionVectorY << " ";
+              }
+              temp = 0;
+            }
+            }
+          }
+          else {
+           // cerr << "lines >0" << endl;
+          //  cin.get();
+            for (int g = 0; g < m_iActualHeight / 8; g++)
+            {
+             // cerr << "g: " << g << endl;
+             // cin.get();
+              for (int i = 0; i < (22 * 8) - 7; i++)//22 bloki o rozmiarze 8
+              {
+
+                for (int k = 0; k < m_iBlockSize; k++)
+                {
+                  for (int j = 0; j < m_iBlockSize; j++)
+                  {
+                    m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (g * 8)][j + i];//ta druga siê przesuwa
+                    //cerr << "wspol 1: " << k + (g * 8) << " wspol 2 : " << j + i << endl;
+
+                    temp += abs(m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + (g * 8)][j + i]);
+                    if (warunek == false)
+                    {
+                      warunek = true;
+                      tempX = k + (g * 8);
+                      tempY = j + i;
+                    }
+                  }
+                }
+              //  cerr << "p:" << temp << " ";
+                warunek = false;
+                if (m_iMotionValue > temp)
+                {
+                  m_iMotionValue = temp;
+                  m_iMotionVectorX = tempX;
+                  m_iMotionVectorY = tempY;
+                //  cerr << "w:" << m_iMotionVectorX << " " << m_iMotionVectorY << " ";
+                }
+                temp = 0;
+              }
+           // }
+
+
+
+            //cin.get();
+            for (int i = 0; i < lines; i++)//22 bloki o rozmiarze 8
+            {
+
+              for (int k = 0; k < m_iBlockSize; k++)
+              {
+                for (int j = 0; j < m_iBlockSize; j++)
+                {
+                 // cerr << "wspol 1: " << k + m_iActualHeight << " wspol 2 : " << j + i << endl;
+                  m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + m_iActualHeight][j + i];//ta druga siê przesuwa
+
+
+                  temp += abs(m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k + m_iActualHeight][j + i]);
+                  if (warunek == false)
+                  {
+                    warunek = true;
+                    tempX = k + m_iActualHeight;
+                    tempY = j + i;
+                  }
+                }
+
+              //  cerr << "p:" << temp << " ";
+                warunek = false;
+                if (m_iMotionValue > temp)
+                {
+                  m_iMotionValue = temp;
+                  m_iMotionVectorX = tempX;
+                  m_iMotionVectorY = tempY;
+                 // cerr << "w:" << m_iMotionVectorX << " " << m_iMotionVectorY << " ";
+                }
+                temp = 0;
               }
             }
-            //cin.get();
           }
         }
       }
       else
       { 
-      cerr << "dwa bloki brak rzedu" << endl;
+     // cerr << "dwa bloki brak rzedu" << endl;
+      cin.get();
       for (int k = 0; k < m_iBlockSize; k++)
       {
         for (int j = 0; j < m_iBlockSize; j++)
@@ -238,31 +387,31 @@ void TPrediction::PredictionMotion()
           m_piMotion[k][j] = m_piImageMatrix[k + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[k][j];//ta druga siê przesuwa
         }
       }
-      cerr << "obraz zakodowany: " << endl;
+     // cerr << "obraz zakodowany: " << endl;
       for (int i = 0; i < m_iBlockSize; i++)
       {
         for (int j = 0; j < m_iBlockSize; j++)
         {
-          cerr << m_piMotion[i][j] << " ";
+       //   cerr << m_piMotion[i][j] << " ";
         }
-        cerr << endl;
+        //cerr << endl;
       }
     }
     }
 
 
-    cerr << "Macierz obrazu:" << endl;
+   // cerr << "Macierz obrazu:" << endl;
     for (int x = 0; x < 3; x++)
     {
       for (int i = 0; i < m_iBlockSize; i++)
       {
         for (int j = 0; j < m_iBlockSize; j++)
         {
-          cerr << m_piImageMatrix[i][j + (8 * x)] << " ";
+       //   cerr << m_piImageMatrix[i][j + (8 * x)] << " ";
         }
-        cerr << endl;
+       // cerr << endl;
       }
-      cerr << endl;
+     // cerr << endl;
     }
 
   }
@@ -296,4 +445,52 @@ void TPrediction::IncrementHeight()
 void TPrediction::IncrementWidth()
 {
   m_iActualWidth += 8;
+}
+
+int TPrediction::GetMotionValue()
+{
+  return m_iMotionValue;
+}
+
+int TPrediction::GetMotionX()
+{
+  return m_iMotionVectorX;
+}
+
+int TPrediction::GetMotionY()
+{
+  return m_iMotionVectorY;
+}
+
+int** TPrediction::PredictionMotion(int x, int y)
+{
+  int temp = 0;
+  if (x >= 212)
+  {
+    for (int i = 0; i < m_iBlockSize; i++)
+    {
+      for (int j = 0; j < m_iBlockSize; j++)
+      {
+        //m_piMotion[i][j] = m_piImageMatrix[i][j];
+        m_piMotion[i][j] = 255;
+        //cerr << "x" << i + x << " " << j + y << endl;
+        //temp += abs(m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[i + x][j + y]);
+      }
+    }
+  }
+  else {
+
+ 
+  for (int i =0; i < m_iBlockSize; i++)
+  {
+    for (int j =0; j < m_iBlockSize; j++)
+    {
+      //m_piMotion[i][j] = m_piImageMatrix[i][j];
+      m_piMotion[i][j] = m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[i + x][j + y];
+     // cerr << "x" << i + x <<" "<< j + y << endl;
+      temp += abs(m_piImageMatrix[i + m_iActualHeight][j + m_iActualWidth] - m_piImageMatrix[i + x][j + y]);
+    }
+  }
+  }
+  return m_piMotion;
 }

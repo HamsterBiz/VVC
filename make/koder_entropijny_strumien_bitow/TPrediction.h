@@ -32,6 +32,11 @@ public:
   int** GetLeftCorner();
   void IncrementHeight();
   void IncrementWidth();
+  int GetMotionValue();
+  int GetMotionX();
+  int GetMotionY();
+  int** PredictionMotion(int x, int y);
+
 
 };
 
