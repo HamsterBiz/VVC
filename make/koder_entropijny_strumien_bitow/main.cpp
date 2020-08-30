@@ -190,8 +190,10 @@ int main()
 
       }
       iZeroAmount = 0;
-      uint8_t uiBit = prediction->GetMotionX();
-      for (uint32_t i = 0; i < 12; i++)//kodowanie kolejnej wartosci po 0
+      //uint8_t uiBit = prediction->GetMotionX();
+      uint8_t uiBit;
+      uiPixelValue = prediction->GetMotionX();
+      for (uint32_t i = 0; i < 12; i++)//kodowanie X
       {
         uiBit = uiPixelValue & 0x01;
         ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
@@ -201,8 +203,9 @@ int main()
       ProbabilityVectorMotion[12]->ChangeProbabilityCode(0);
       ansMotion->Code(ProbabilityVectorMotion[12]->GetProbabilityOfOne(), 0);
 
-      uiBit = prediction->GetMotionY();
-      for (uint32_t i = 0; i < 12; i++)//kodowanie kolejnej wartosci po 0
+     // uiBit = prediction->GetMotionY();
+      uiPixelValue = prediction->GetMotionY();
+      for (uint32_t i = 0; i < 12; i++)//kodowanie Y (pozycji gdzie znjaduje się blok)
       {
         uiBit = uiPixelValue & 0x01;
         ProbabilityVectorMotion[i]->ChangeProbabilityCode(uiBit);
@@ -762,6 +765,7 @@ int main()
   int temppp;
   int zeros = 0;
   bool motion = false;
+  int counter_cordinates = 0;
   for (unsigned y = 0; y < 600; y++)
   {
     temppp = ansTop->Decode(ProbabilityVectorTop[15]->GetProbabilityOfOne());
@@ -776,13 +780,14 @@ int main()
     ProbabilityVectorTop[13]->ChangeProbabilityDecode(temppp);
     if (motion == true)
     {
+      cerr << "wspolrzedne: ";
       for (int k = 0; k < 2; k++)
       {
         uiPixelValue = 0;
         for (uint32_t i = 0; i < 13; i++)
         {
           // cerr << "w";
-          if (i == 0)
+          if (i == 0)// bit znaku w przypadku dwóch pierwszych wartości x i y musi być liczbą nieujemną więc możemy otrzymać tylko 0 z dekodowania
           {
             if (0 != ansTop->Decode(ProbabilityVectorTop[12 - i]->GetProbabilityOfOne()))
             {
@@ -798,14 +803,22 @@ int main()
             uiPixelValue = (uiPixelValue << 1) | uiBit;
           }
         }
-        cerr << " ";
         if (Negative == true)
         {
           uiPixelValue = uiPixelValue * (-1);
           Negative = false;
         }
-        cerr << "w" << uiPixelValue << " ";
+        if (counter_cordinates == 0)
+        {
+
+          cerr << "y: " << uiPixelValue << " ";
+          counter_cordinates++;
+        }
+        else cerr << " x: " << uiPixelValue << " ";
       }
+      counter_cordinates = 0;
+      motion = false;
+    }
       for (int k = 0; k < 64; k++)
       {
         uiPixelValue = 0;
@@ -854,7 +867,7 @@ int main()
       zeros = 0;
       cerr << endl;
       //cin.get();
-    }
+    
 
   }
 }
